@@ -1,0 +1,412 @@
+
+// import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, FileText, FileDown, Printer } from 'lucide-react';
+import { useRef, useCallback } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+interface MatchPair {
+  left: string;
+  right: string;
+}
+
+interface QuestionData {
+  qno: number;
+  question: string;
+  marks: number;
+  options?: string[];
+  answer?: string;
+  type?: string;
+  matchPairs?: MatchPair[];
+  isMerged?: boolean;
+}
+
+interface SectionData {
+  sectionTitle: string;
+  questions: QuestionData[];
+}
+// type Section = {
+//   sectionTitle: string;
+//   questions: Question[];
+// };
+
+interface PaperDetails {
+  schoolName?: string;
+  examName?: string;
+  class?: string;
+  subject?: string;
+  date?: string;
+  time?: string;
+  maxMarks?: number;
+  instructions?: string[];
+}
+
+interface PaperData {
+  paperDetails: PaperDetails;
+  sections: SectionData[];
+}
+
+interface PaperPreviewPageProps {
+  onNavigate: (page: string, data?: any) => void;
+  paperData: PaperData;
+}
+
+const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+  const paperRef = useRef<HTMLDivElement>(null);
+  const generatePDF = useCallback(async (includeAnswers: boolean) => {
+    if (!paperRef.current) return;
+    const canvas = await html2canvas(paperRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    let heightLeft = pdfHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+    heightLeft -= pdf.internal.pageSize.getHeight();
+
+    while (heightLeft > 0) {
+      position -= pdf.internal.pageSize.getHeight();
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+    }
+
+    const fileName = includeAnswers ? 'answer-sheet.pdf' : 'question-paper.pdf';
+    pdf.save(fileName);
+  }, []);
+
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  if (!paperData) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center space-y-4">
+          <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
+          <h2 className="text-xl font-semibold text-foreground">No Paper Data</h2>
+          <p className="text-muted-foreground">No paper data found. Please go back and create a paper first.</p>
+          <Button onClick={() => onNavigate('paper-creator')} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Editor
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const { paperDetails, sections } = paperData;
+  const totalMarks = paperDetails.maxMarks ?? sections.reduce(
+    (sum, s) => sum + s.questions.reduce((qs, q) => qs + q.marks, 0), 0
+  );
+
+  return (
+    <div className="flex flex-col h-screen bg-muted/30 print:bg-white">
+      {/* Sticky Toolbar */}
+      <div className="sticky top-0 z-50 bg-card border-b border-border shadow-sm print:hidden">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <Button variant="ghost" onClick={() => onNavigate('paper-creator')} className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Editor
+          </Button>
+
+          <h1 className="text-lg font-semibold text-foreground">Paper Preview</h1>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handlePrint}>
+              <Printer className="h-4 w-4 mr-2" />
+              Print
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => generatePaper(paperData)}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => generateAnswerSheet(paperData)}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Answer Sheet PDF
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Paper Content */}
+      <ScrollArea className="flex-1">
+        <div className="max-w-4xl mx-auto py-8 px-4 print:p-0 print:max-w-none">
+          <div
+            ref={paperRef}
+            className="bg-card rounded-lg shadow-lg border border-border p-10 print:shadow-none print:border-none print:rounded-none"
+            style={{ fontFamily: "'Times New Roman', serif" }}
+          >
+            {/* Paper Header */}
+            <div className="text-center mb-6">
+              {paperDetails.schoolName && (
+                <h1 className="text-2xl font-bold text-foreground tracking-wide uppercase">
+                  {paperDetails.schoolName}
+                </h1>
+              )}
+              {paperDetails.examName && (
+                <h2 className="text-lg font-semibold text-foreground mt-1">
+                  {paperDetails.examName}
+                </h2>
+              )}
+
+              <div className="flex justify-between items-center mt-4 text-sm text-foreground">
+                <div className="text-left space-y-0.5">
+                  {paperDetails.class && <div><span className="font-semibold">Class:</span> {paperDetails.class}</div>}
+                  {paperDetails.subject && <div><span className="font-semibold">Subject:</span> {paperDetails.subject}</div>}
+                </div>
+                <div className="text-right space-y-0.5">
+                  {paperDetails.date && <div><span className="font-semibold">Date:</span> {paperDetails.date}</div>}
+                  {paperDetails.time && <div><span className="font-semibold">Time:</span> {paperDetails.time}</div>}
+                  <div><span className="font-semibold">Max Marks:</span> {totalMarks}</div>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="my-4 bg-foreground/20" />
+
+            {/* Instructions */}
+            {paperDetails.instructions && paperDetails.instructions.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-bold text-foreground mb-2 text-sm uppercase tracking-wider">General Instructions:</h3>
+                <ol className="text-sm text-foreground space-y-1 pl-4 list-decimal">
+                  {paperDetails.instructions.map((inst, i) => (
+                    <li key={i}>{inst}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            <Separator className="my-4 bg-foreground/20" />
+
+            {/* Sections & Questions */}
+            <div className="space-y-6">
+              {sections.map((section, sIdx) => (
+                <div key={sIdx}>
+                  {section.sectionTitle && (
+                    <h3 className="font-bold text-foreground text-base mb-3 uppercase tracking-wide">
+                      {section.sectionTitle}
+                    </h3>
+                  )}
+
+                  <div className="space-y-4">
+                    {section.questions.map((q) => (
+                      <div key={q.qno} className="flex items-start">
+                        <span className="font-semibold text-foreground mr-3 min-w-[2rem]">{q.qno}.</span>
+                        <div className="flex-1">
+                          {q.isMerged ? (
+                            <div>
+                              {q.question.split(/\n\nOR\n\n/).map((part, pIdx, arr) => (
+                                <div key={pIdx}>
+                                  <p className="text-foreground leading-relaxed">{part}</p>
+                                  {pIdx < arr.length - 1 && (
+                                    <p className="text-center font-bold text-foreground my-2">OR</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : q.type === 'Match the Following' && q.matchPairs ? (
+                            <div>
+                              <p className="text-foreground leading-relaxed mb-3">{q.question}</p>
+                              <div className="grid grid-cols-2 gap-x-12 gap-y-1">
+                                {q.matchPairs.map((pair, pIdx) => (
+                                  <div key={`left-${pIdx}`} className="flex items-center col-start-1">
+                                    <span className="font-semibold mr-2">({String.fromCharCode(97 + pIdx)})</span>
+                                    <span className="text-foreground">{pair.left}</span>
+                                  </div>
+                                ))}
+                                {q.matchPairs.map((pair, pIdx) => (
+                                  <div key={`right-${pIdx}`} className="flex items-center col-start-2" style={{ gridRow: pIdx + 1 }}>
+                                    <span className="font-semibold mr-2">({pIdx + 1})</span>
+                                    <span className="text-foreground">{pair.right}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-foreground leading-relaxed">{q.question}</p>
+                          )}
+
+                          {/* MCQ Options */}
+                          {q.options && q.options.length > 0 && (
+                            <div className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1">
+                              {q.options.map((opt, oIdx) => (
+                                <div key={oIdx} className="text-foreground text-sm">
+                                  ({String.fromCharCode(97 + oIdx)}) {opt}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm font-semibold text-foreground ml-4 whitespace-nowrap">[{q.marks}]</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="mt-10 pt-4 border-t border-foreground/10 text-center">
+              <p className="text-sm text-muted-foreground italic">— End of Question Paper —</p>
+            </div>
+          </div>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+};
+
+export default PaperPreviewPage;
+
+
+  const buildHeader = (details: PaperDetails) => ([
+    { text: details.schoolName, style: "header" },
+    { text: details.examName, style: "subheader" },
+    { text: `${details.class} - ${details.subject}`, style: "subheader" },
+    {
+      columns: [
+        { text: `Time: ${details.time}`, alignment: "left" },
+        { text: `Date: ${details.date}`, alignment: "right" }
+      ]
+    },
+    {
+      columns: [
+        { text: `Max Marks: ${details.maxMarks}`, alignment: "left" },
+        { text: `Roll no: __________`, alignment: "right" }
+      ],
+      margin: [0, 0, 0, 10]
+    },
+    {
+      canvas: [{ type: "line", x1: 0, y1: 0, x2: 520, y2: 0, lineWidth: 1 }],
+      margin: [0, 10, 0, 10]
+    }
+  ]);
+
+  const getBaseDocDefinition = (content: any[]) => ({
+    content,
+    styles: {
+      header: {
+        fontSize: 16,
+        bold: true,
+        alignment: "center",
+        margin: [0, 0, 0, 5]
+      },
+      subheader: {
+        fontSize: 13,
+        bold: true,
+        alignment: "center",
+        margin: [0, 0, 0, 10]
+      },
+      sectionHeader: {
+        fontSize: 12,
+        bold: true,
+        margin: [0, 10, 0, 5]
+      },
+      answerText: {
+        italics: true,
+        color: "green",
+        margin: [20, 2, 0, 5]
+      }
+    },
+    pageMargins: [40, 40, 40, 40]
+  });
+
+  // ================================
+  // 📄 Question Paper
+  // ================================
+  const generatePaper = (paperData: any) => {
+    if (!paperData) return;
+
+    const details = paperData.paperDetails;
+    const content: any[] = [...buildHeader(details)];
+
+    paperData.sections.forEach((sectionData: any) => {
+      content.push({
+        text: sectionData.sectionTitle,
+        style: "sectionHeader"
+      });
+
+      sectionData.questions.forEach((q: any) => {
+        if (q.options) {
+          content.push({
+            stack: [
+              {
+                columns: [
+                  { text: `${q.qno}. ${q.question}`, width: "*" },
+                  { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+                ]
+              },
+              ...Object.entries(q.options).map(([key,value]) => ({
+                text: `   (${key}) ${value}`,
+                margin: [15, 0, 0, 0]
+              }))
+            ],
+            margin: [0, 5]
+          });
+        } else {
+          content.push({
+            columns: [
+              { text: `${q.qno}. ${q.question}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
+          });
+        }
+      });
+    });
+
+    pdfMake.createPdf(getBaseDocDefinition(content)).open();
+  };
+
+  // ================================
+  // 🟢 Answer Sheet Generator
+  // ================================
+  const generateAnswerSheet = (paperData: any) => {
+    if (!paperData) return;
+
+    const details = paperData.paperDetails;
+    const content: any[] = [...buildHeader(details)];
+
+    // Add Answer Sheet Title
+    content.splice(2, 0, { text: "ANSWER SHEET", style: "sectionHeader", alignment: "center" });
+
+    paperData.sections.forEach((sectionData: any) => {
+      content.push({
+        text: sectionData.sectionTitle,
+        style: "sectionHeader"
+      });
+
+      sectionData.questions.forEach((q: any) => {
+        content.push({
+          columns: [
+            { text: `${q.qno}. ${q.question}`, width: "*" },
+            { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+          ],
+          margin: [0, 5]
+        });
+
+        if (q.answer) {
+          content.push({
+            text: `Answer: ${q.answer}`,
+            style: "answerText"
+          });
+        }
+      });
+    });
+
+    pdfMake.createPdf(getBaseDocDefinition(content)).open();
+  };
