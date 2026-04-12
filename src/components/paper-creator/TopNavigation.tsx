@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentUser } from '@/lib/auth';
 import { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 
 interface TopNavigationProps {
   searchQuery: string;
@@ -22,6 +23,7 @@ export const TopNavigation = ({
   onNavigate
 }: TopNavigationProps) => {
     const [user, setUser] = useState(getCurrentUser());
+    const [isToolInfoOpen, setIsToolInfoOpen] = useState(false);
     useEffect(() => {
         const checkAuthStatus = () => {
           setUser(getCurrentUser());
@@ -35,6 +37,7 @@ export const TopNavigation = ({
       }, []);
   
   return (
+    <>
     <header className="bg-card border-b border-border shadow-sm">
       {/* Top Layer */}
       <div className="flex items-center justify-between px-6 py-3">
@@ -73,25 +76,6 @@ export const TopNavigation = ({
             </Avatar>
           </button>
          
-          {/* <button 
-                  onClick={() => onNavigate('profile')}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 ${
-                    isScrolled 
-                      ? 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' 
-                      : 'text-white hover:bg-white/10'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-full overflow-hidden border-2 ${
-                    isScrolled ? 'border-gray-300' : 'border-white/30'
-                  }`}>
-                    <img
-                      src="https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=32&h=32&fit=crop&crop=face"
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span className="text-sm font-medium">{user.name}</span>
-                </button> */}
           <div className="hidden sm:block text-right">
             <p className="text-sm font-medium">{user?.name || 'Guest'}</p>
             <p className="text-xs text-muted-foreground">Mathematics Dept.</p>
@@ -117,11 +101,33 @@ export const TopNavigation = ({
           </div>
         </div>
 
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => setIsToolInfoOpen(true)}>
           <Info className="h-4 w-4 mr-2" />
           Tool Information
         </Button>
       </div>
     </header>
+
+    <Dialog open={isToolInfoOpen} onOpenChange={setIsToolInfoOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Tool Information</DialogTitle>
+          <DialogClose />
+        </DialogHeader>
+        <div className="space-y-2 text-sm">
+          <p>• For each section, please create a heading first. Never start dragging questions directly without a heading/section title.</p>
+          <p>• While creating "Match the Following" questions, please be cautious with the pairing to ensure accuracy.</p>
+          <p>• For custom questions, we never store them in our database. They are only visible in your created paper.</p>
+          <p>• Use the search bar to quickly find questions from your library by keywords or tags.</p>
+          <p>• Preview your paper before finalizing to check formatting and ensure all questions are properly included.</p>
+          <p>• Save your work frequently to avoid losing progress during paper creation.</p>
+          <p>• Utilize different question types (MCQ, Short Answer, Essay) to create balanced assessments.</p>
+          <p>• Check total marks and question count in the navigation bar to maintain paper structure.</p>
+          <p>• Export your paper as PDF for printing or sharing with colleagues and students.</p>
+          <p>• Remember, all data is processed locally for privacy and security.</p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 };

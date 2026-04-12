@@ -268,7 +268,6 @@ export const PaperPreview = ({ items, onRemoveItem, onUpdateItem, setPaperData, 
           question: item.question_text,
           marks: item.marks,
           options: item.options || undefined,
-          // answer: item.answer || undefined,
           answer: typeof item.answer === 'string' ? item.answer : item.answer?.text
         });
       }

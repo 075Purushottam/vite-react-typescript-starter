@@ -6,7 +6,7 @@ import { TopNavigation } from './paper-creator/TopNavigation';
 import { LeftSidebar } from './paper-creator/LeftSidebar';
 import { QuestionLibrary } from './paper-creator/QuestionLibrary';
 import { PaperPreview } from './paper-creator/PaperPreview';
-import QuestionPaperGenerator from './paper-creator/QuestionPaperGenerator';
+// import QuestionPaperGenerator from './paper-creator/QuestionPaperGenerator';
 import { ChatBot } from './paper-creator/ChatBot';
 import { isQuestion, isHeading } from '@/types/paper';
 import type { Question, PaperItem, Heading } from '@/types/paper';
@@ -126,7 +126,7 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
 
         if (response.success) {
           alert("Paper saved successfully!");
-          localStorage.removeItem("paperCreatorState");
+          // localStorage.removeItem("paperCreatorState");
           onNavigate('paper-preview', { paperData: paperData }); // Pass paperData to preview page
           // navigate("/paper-preview", { state: { paperData } });
         } else {
@@ -420,10 +420,7 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
           </div>
         ) : null}
       </DragOverlay>
-      {/* <QuestionPaperGenerator
-              paperData={paperData}
-              // trigger={generateTrigger}
-      /> */}
+    
     </DndContext>
   );
 };

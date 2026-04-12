@@ -194,6 +194,7 @@ export const loginUser = async (loginData: LoginData): Promise<AuthResponse> => 
       localStorage.setItem('is_logged_in', 'true');
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
+      localStorage.removeItem("paperCreatorState");
     }
 
     return data;
