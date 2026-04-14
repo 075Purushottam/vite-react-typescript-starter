@@ -1,17 +1,4 @@
-// export interface Question {
-//   id: string;
-//   text: string;
-//   type: 'MCQ' | 'Short Answer' | 'Long Answer' | 'True False' | 'Fill in the Blank' | 'Match the Following';
-//   difficulty: 'Easy' | 'Medium' | 'Hard';
-//   marks: number;
-//   chapter: string;
-//   options?: string[];
-//   answer?: string;
-//   matchPairs?: { left: string; right: string; }[];
-//   isMerged?: boolean;
-//   mergedWith?: string;
-//   originalId?: string;
-// }
+
 export interface Question {
   id: string;
   question_text: string;

@@ -240,7 +240,7 @@ export const LeftSidebar = ({ filters, setFilters, onSavePaper, onAddHeading, on
             <CreateQuestionDialog onCreateQuestion={onCreateQuestion} />
           </CardContent>
            <CardContent>
-            <MatchFollowingDialog onCreateQuestion={onCreateQuestion} />
+            <MatchFollowingDialog onCreateQuestion={onCreateQuestion} onAddHeading={onAddHeading} />
           </CardContent>
         </Card>
 

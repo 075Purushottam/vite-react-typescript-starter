@@ -129,23 +129,50 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
 
     // Sections
     paperData.sections.forEach((sectionData, sidx) => {
-      elements.push(
-        <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
-          {sectionData.sectionTitle}
-        </div>
-      );
+      // elements.push(
+      //   <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
+      //     {sectionData.sectionTitle}
+      //   </div>
+      // );
 
       sectionData.questions.forEach((q, qidx) => {
-        if (q.options) {
+        if (q.type === 'Match the Following') {
+          // Parse match question from stored text format
+          const pairs = q.question.split('\n').map(line => {
+            const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
+            if (match) {
+              return { left: match[2].trim(), right: match[4].trim() };
+            }
+            return null;
+          }).filter(Boolean);
+
+          elements.push(
+            <div key={`q-${sidx}-${qidx}`} className="my-1.5">
+              <div className="flex justify-between mb-3">
+                <div className="flex-1">{q.qno}. {sectionData.sectionTitle}</div>
+                <div className="ml-2">[{q.marks}]</div>
+              </div>
+              <div className="grid grid-cols-2 gap-x-20 gap-y-2 pl-5">
+                {pairs.map((pair: any, index: number) => (
+                  <>
+                    <div key={`left-${index}`} className="mb-2">
+                      <span className="font-medium">({String.fromCharCode(97 + index)})</span> {pair.left}
+                    </div>
+                    <div key={`right-${index}`} className="mb-2">
+                      <span className="font-medium">({index + 1})</span> {pair.right}
+                    </div>
+                  </>
+                ))}
+              </div>
+            </div>
+          );
+        } else if (q.options) {
           elements.push(
             <div key={`q-${sidx}-${qidx}`} className="my-1.5">
               <div className="flex justify-between">
                 <div className="flex-1">{q.qno}. {q.question}</div>
                 <div className="ml-2">[{q.marks}]</div>
               </div>
-              {/* {Object.entries(q.options).map(([key, value]) => (
-                <div key={key} className="ml-4">({key}) {value}</div>
-              ))} */}
               <div className="grid grid-cols-2 gap-x-6-gap-y-1 mt-2">
                 {Object.entries(q.options).map(([key, value]) => (
                   <div key={key}>
@@ -305,13 +332,51 @@ export default PaperPreviewPage;
     const content: any[] = [...buildHeader(details)];
 
     paperData.sections.forEach((sectionData: any) => {
-      content.push({
-        text: sectionData.sectionTitle,
-        style: "sectionHeader"
-      });
+      // content.push({
+      //   text: sectionData.sectionTitle,
+      //   style: "sectionHeader"
+      // });
 
       sectionData.questions.forEach((q: any) => {
-        if (q.options) {
+        if (q.type === 'Match the Following') {
+          // Parse match question from stored text format
+          const pairs = q.question.split('\n').map((line: string) => {
+            const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
+            if (match) {
+              return { left: match[2].trim(), right: match[4].trim() };
+            }
+            return null;
+          }).filter(Boolean);
+
+          content.push({
+            columns: [
+              { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
+          });
+
+          content.push({
+            columns: [
+              {
+                width: "*",
+                stack: pairs.map((pair: any, index: number) => ({
+                  text: `(${String.fromCharCode(97 + index)}) ${pair.left}`,
+                  margin: [0, 3, 0, 3]
+                }))
+              },
+              {
+                width: "*",
+                stack: pairs.map((pair: any, index: number) => ({
+                  text: `(${index + 1}) ${pair.right}`,
+                  margin: [0, 3, 0, 3]
+                }))
+              }
+            ],
+            columnGap: 40,
+            margin: [20, 5, 0, 5]
+          });
+        } else if (q.options) {
           content.push({
             stack: [
               {
@@ -355,25 +420,70 @@ export default PaperPreviewPage;
     content.splice(2, 0, { text: "ANSWER SHEET", style: "sectionHeader", alignment: "center" });
 
     paperData.sections.forEach((sectionData: any) => {
-      content.push({
-        text: sectionData.sectionTitle,
-        style: "sectionHeader"
-      });
+      // content.push({
+      //   text: sectionData.sectionTitle,
+      //   style: "sectionHeader"
+      // });
 
       sectionData.questions.forEach((q: any) => {
-        content.push({
-          columns: [
-            { text: `${q.qno}. ${q.question}`, width: "*" },
-            { text: `[${q.marks}]`, width: "auto", alignment: "right" }
-          ],
-          margin: [0, 5]
-        });
+        if (q.type === 'Match the Following') {
+          // Parse match question from stored text format
+          const pairs = q.question.split('\n').map((line: string) => {
+            const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
+            if (match) {
+              return { left: match[2].trim(), right: match[4].trim() };
+            }
+            return null;
+          }).filter(Boolean);
 
-        if (q.answer) {
           content.push({
-            text: `Answer: ${q.answer}`,
-            style: "answerText"
+            columns: [
+              { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
           });
+
+          if (q.answer) {
+            // For match questions, show left items paired with correct answers
+            const answerLines = (typeof q.answer === 'object' && q.answer.answer ? q.answer.answer : q.answer).split('\n');
+            
+            content.push({
+              columns: [
+                {
+                  width: "*",
+                  stack: pairs.map((pair: any, index: number) => ({
+                    text: `(${String.fromCharCode(97 + index)}) ${pair.left}`,
+                    margin: [0, 3, 0, 3]
+                  }))
+                },
+                {
+                  width: "*",
+                  stack: answerLines.map((line: string) => ({
+                    text: line,
+                    margin: [0, 3, 0, 3]
+                  }))
+                }
+              ],
+              columnGap: 40,
+              margin: [20, 5, 0, 5]
+            });
+          }
+        } else {
+          content.push({
+            columns: [
+              { text: `${q.qno}. ${q.question}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
+          });
+
+          if (q.answer) {
+            content.push({
+              text: `Answer: ${q.answer}`,
+              style: "answerText"
+            });
+          }
         }
       });
     });

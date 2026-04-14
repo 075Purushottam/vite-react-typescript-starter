@@ -27,6 +27,7 @@ interface PaperPreviewProps {
     boardId: string;
     examName: string;
     timeDuration: string;
+    examInstructions: string;
   };
 }
 
@@ -174,7 +175,6 @@ const SortableItem = ({ item, index, questionNumber, sectionNumber, onRemove, on
               <span className="font-medium text-foreground mr-2 whitespace-nowrap">{questionNumber}.</span>
               {item.type === 'Match the Following' && item.matchPairs ? (
                 <div className="text-foreground leading-relaxed flex-1">
-                  <p className="mb-3">{item.question_text}</p>
                   <div className="grid grid-cols-2 gap-8">
                     <div>
                       {item.matchPairs.map((pair, index) => (
@@ -268,6 +268,7 @@ export const PaperPreview = ({ items, onRemoveItem, onUpdateItem, setPaperData, 
           question: item.question_text,
           marks: item.marks,
           options: item.options || undefined,
+          type: item.type || undefined,
           answer: typeof item.answer === 'string' ? item.answer : item.answer?.text
         });
       }
@@ -353,12 +354,13 @@ export const PaperPreview = ({ items, onRemoveItem, onUpdateItem, setPaperData, 
       'marks' in item ? sum + item.marks : sum, 0
     ),
     duration: examDetails.timeDuration, // You might want to add this to examDetails
-    instructions: [
-      'All questions are compulsory.',
-      'Use of calculators is not permitted.',
-      'Show all working clearly.',
-      'Marks are indicated against each question.'
-    ]
+    // instructions: [
+    //   'All questions are compulsory.',
+    //   'Use of calculators is not permitted.',
+    //   'Show all working clearly.',
+    //   'Marks are indicated against each question.'
+    // ],
+    instructions: examDetails.examInstructions ? examDetails.examInstructions.split('\n') : []
   };
 
   return (
