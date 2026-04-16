@@ -92,6 +92,110 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
     window.print();
   }, []);
 
+  const styleMap: Record<string, string> = {
+    header: "text-center font-bold text-xl mb-1",
+    subheader: "text-center font-bold text-lg mb-2.5",
+    sectionHeader: "font-bold text-base mt-2.5 mb-1",
+    answerText: "italic text-green-600 ml-5 mt-0.5 mb-1"
+  };
+
+  const renderPaperContent = (paperData: PaperData) => {
+    const details = paperData.paperDetails;
+    const elements: JSX.Element[] = [];
+
+    // Header
+    const headerItems = buildHeader(details);
+    headerItems.forEach((item, idx) => {
+      if (item.text) {
+        elements.push(
+          <div key={`header-${idx}`} className={styleMap[item.style!] || ""}>
+            {item.text}
+          </div>
+        );
+      } else if (item.columns) {
+        elements.push(
+          <div key={`header-${idx}`} className="flex justify-between text-sm">
+            {item.columns.map((col, cidx) => (
+              <div key={cidx} className={col.alignment === 'right' ? 'text-right' : 'text-left'}>
+                {col.text}
+              </div>
+            ))}
+          </div>
+        );
+      } else if (item.canvas) {
+        elements.push(<hr key={`header-${idx}`} className="my-2.5 border-t" />);
+      }
+    });
+
+    // Sections
+    paperData.sections.forEach((sectionData, sidx) => {
+      // elements.push(
+      //   <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
+      //     {sectionData.sectionTitle}
+      //   </div>
+      // );
+
+      sectionData.questions.forEach((q, qidx) => {
+        if (q.type === 'Match the Following') {
+          // Parse match question from stored text format
+          const pairs = q.question.split('\n').map(line => {
+            const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
+            if (match) {
+              return { left: match[2].trim(), right: match[4].trim() };
+            }
+            return null;
+          }).filter(Boolean);
+
+          elements.push(
+            <div key={`q-${sidx}-${qidx}`} className="my-1.5">
+              <div className="flex justify-between mb-3">
+                <div className="flex-1">{q.qno}. {sectionData.sectionTitle}</div>
+                <div className="ml-2">[{q.marks}]</div>
+              </div>
+              <div className="grid grid-cols-2 gap-x-20 gap-y-2 pl-5">
+                {pairs.map((pair: any, index: number) => (
+                  <>
+                    <div key={`left-${index}`} className="mb-2">
+                      <span className="font-medium">({String.fromCharCode(97 + index)})</span> {pair.left}
+                    </div>
+                    <div key={`right-${index}`} className="mb-2">
+                      <span className="font-medium">({index + 1})</span> {pair.right}
+                    </div>
+                  </>
+                ))}
+              </div>
+            </div>
+          );
+        } else if (q.options) {
+          elements.push(
+            <div key={`q-${sidx}-${qidx}`} className="my-1.5">
+              <div className="flex justify-between">
+                <div className="flex-1">{q.qno}. {q.question}</div>
+                <div className="ml-2">[{q.marks}]</div>
+              </div>
+              <div className="grid grid-cols-2 gap-x-6-gap-y-1 mt-2">
+                {Object.entries(q.options).map(([key, value]) => (
+                  <div key={key}>
+                    <strong>{key}:</strong> {value}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        } else {
+          elements.push(
+            <div key={`q-${sidx}-${qidx}`} className="flex justify-between my-1.5">
+              <div className="flex-1">{q.qno}. {q.question}</div>
+              <div className="ml-2">[{q.marks}]</div>
+            </div>
+          );
+        }
+      });
+    });
+
+    return elements;
+  };
+
   if (!paperData) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
@@ -150,114 +254,7 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
             className="bg-card rounded-lg shadow-lg border border-border p-10 print:shadow-none print:border-none print:rounded-none"
             style={{ fontFamily: "'Times New Roman', serif" }}
           >
-            {/* Paper Header */}
-            <div className="text-center mb-6">
-              {paperDetails.schoolName && (
-                <h1 className="text-2xl font-bold text-foreground tracking-wide uppercase">
-                  {paperDetails.schoolName}
-                </h1>
-              )}
-              {paperDetails.examName && (
-                <h2 className="text-lg font-semibold text-foreground mt-1">
-                  {paperDetails.examName}
-                </h2>
-              )}
-
-              <div className="flex justify-between items-center mt-4 text-sm text-foreground">
-                <div className="text-left space-y-0.5">
-                  {paperDetails.class && <div><span className="font-semibold">Class:</span> {paperDetails.class}</div>}
-                  {paperDetails.subject && <div><span className="font-semibold">Subject:</span> {paperDetails.subject}</div>}
-                </div>
-                <div className="text-right space-y-0.5">
-                  {paperDetails.date && <div><span className="font-semibold">Date:</span> {paperDetails.date}</div>}
-                  {paperDetails.time && <div><span className="font-semibold">Time:</span> {paperDetails.time}</div>}
-                  <div><span className="font-semibold">Max Marks:</span> {totalMarks}</div>
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-4 bg-foreground/20" />
-
-            {/* Instructions */}
-            {paperDetails.instructions && paperDetails.instructions.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-bold text-foreground mb-2 text-sm uppercase tracking-wider">General Instructions:</h3>
-                <ol className="text-sm text-foreground space-y-1 pl-4 list-decimal">
-                  {paperDetails.instructions.map((inst, i) => (
-                    <li key={i}>{inst}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
-
-            <Separator className="my-4 bg-foreground/20" />
-
-            {/* Sections & Questions */}
-            <div className="space-y-6">
-              {sections.map((section, sIdx) => (
-                <div key={sIdx}>
-                  {section.sectionTitle && (
-                    <h3 className="font-bold text-foreground text-base mb-3 uppercase tracking-wide">
-                      {section.sectionTitle}
-                    </h3>
-                  )}
-
-                  <div className="space-y-4">
-                    {section.questions.map((q) => (
-                      <div key={q.qno} className="flex items-start">
-                        <span className="font-semibold text-foreground mr-3 min-w-[2rem]">{q.qno}.</span>
-                        <div className="flex-1">
-                          {q.isMerged ? (
-                            <div>
-                              {q.question.split(/\n\nOR\n\n/).map((part, pIdx, arr) => (
-                                <div key={pIdx}>
-                                  <p className="text-foreground leading-relaxed">{part}</p>
-                                  {pIdx < arr.length - 1 && (
-                                    <p className="text-center font-bold text-foreground my-2">OR</p>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          ) : q.type === 'Match the Following' && q.matchPairs ? (
-                            <div>
-                              <p className="text-foreground leading-relaxed mb-3">{q.question}</p>
-                              <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                                {q.matchPairs.map((pair, pIdx) => (
-                                  <div key={`left-${pIdx}`} className="flex items-center col-start-1">
-                                    <span className="font-semibold mr-2">({String.fromCharCode(97 + pIdx)})</span>
-                                    <span className="text-foreground">{pair.left}</span>
-                                  </div>
-                                ))}
-                                {q.matchPairs.map((pair, pIdx) => (
-                                  <div key={`right-${pIdx}`} className="flex items-center col-start-2" style={{ gridRow: pIdx + 1 }}>
-                                    <span className="font-semibold mr-2">({pIdx + 1})</span>
-                                    <span className="text-foreground">{pair.right}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="text-foreground leading-relaxed">{q.question}</p>
-                          )}
-
-                          {/* MCQ Options */}
-                          {q.options && q.options.length > 0 && (
-                            <div className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1">
-                              {q.options.map((opt, oIdx) => (
-                                <div key={oIdx} className="text-foreground text-sm">
-                                  ({String.fromCharCode(97 + oIdx)}) {opt}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-sm font-semibold text-foreground ml-4 whitespace-nowrap">[{q.marks}]</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {renderPaperContent(paperData)}
 
             {/* Footer */}
             <div className="mt-10 pt-4 border-t border-foreground/10 text-center">
@@ -335,13 +332,51 @@ export default PaperPreviewPage;
     const content: any[] = [...buildHeader(details)];
 
     paperData.sections.forEach((sectionData: any) => {
-      content.push({
-        text: sectionData.sectionTitle,
-        style: "sectionHeader"
-      });
+      // content.push({
+      //   text: sectionData.sectionTitle,
+      //   style: "sectionHeader"
+      // });
 
       sectionData.questions.forEach((q: any) => {
-        if (q.options) {
+        if (q.type === 'Match the Following') {
+          // Parse match question from stored text format
+          const pairs = q.question.split('\n').map((line: string) => {
+            const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
+            if (match) {
+              return { left: match[2].trim(), right: match[4].trim() };
+            }
+            return null;
+          }).filter(Boolean);
+
+          content.push({
+            columns: [
+              { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
+          });
+
+          content.push({
+            columns: [
+              {
+                width: "*",
+                stack: pairs.map((pair: any, index: number) => ({
+                  text: `(${String.fromCharCode(97 + index)}) ${pair.left}`,
+                  margin: [0, 3, 0, 3]
+                }))
+              },
+              {
+                width: "*",
+                stack: pairs.map((pair: any, index: number) => ({
+                  text: `(${index + 1}) ${pair.right}`,
+                  margin: [0, 3, 0, 3]
+                }))
+              }
+            ],
+            columnGap: 40,
+            margin: [20, 5, 0, 5]
+          });
+        } else if (q.options) {
           content.push({
             stack: [
               {
@@ -385,25 +420,70 @@ export default PaperPreviewPage;
     content.splice(2, 0, { text: "ANSWER SHEET", style: "sectionHeader", alignment: "center" });
 
     paperData.sections.forEach((sectionData: any) => {
-      content.push({
-        text: sectionData.sectionTitle,
-        style: "sectionHeader"
-      });
+      // content.push({
+      //   text: sectionData.sectionTitle,
+      //   style: "sectionHeader"
+      // });
 
       sectionData.questions.forEach((q: any) => {
-        content.push({
-          columns: [
-            { text: `${q.qno}. ${q.question}`, width: "*" },
-            { text: `[${q.marks}]`, width: "auto", alignment: "right" }
-          ],
-          margin: [0, 5]
-        });
+        if (q.type === 'Match the Following') {
+          // Parse match question from stored text format
+          const pairs = q.question.split('\n').map((line: string) => {
+            const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
+            if (match) {
+              return { left: match[2].trim(), right: match[4].trim() };
+            }
+            return null;
+          }).filter(Boolean);
 
-        if (q.answer) {
           content.push({
-            text: `Answer: ${q.answer}`,
-            style: "answerText"
+            columns: [
+              { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
           });
+
+          if (q.answer) {
+            // For match questions, show left items paired with correct answers
+            const answerLines = (typeof q.answer === 'object' && q.answer.answer ? q.answer.answer : q.answer).split('\n');
+            
+            content.push({
+              columns: [
+                {
+                  width: "*",
+                  stack: pairs.map((pair: any, index: number) => ({
+                    text: `(${String.fromCharCode(97 + index)}) ${pair.left}`,
+                    margin: [0, 3, 0, 3]
+                  }))
+                },
+                {
+                  width: "*",
+                  stack: answerLines.map((line: string) => ({
+                    text: line,
+                    margin: [0, 3, 0, 3]
+                  }))
+                }
+              ],
+              columnGap: 40,
+              margin: [20, 5, 0, 5]
+            });
+          }
+        } else {
+          content.push({
+            columns: [
+              { text: `${q.qno}. ${q.question}`, width: "*" },
+              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+            ],
+            margin: [0, 5]
+          });
+
+          if (q.answer) {
+            content.push({
+              text: `Answer: ${q.answer}`,
+              style: "answerText"
+            });
+          }
         }
       });
     });

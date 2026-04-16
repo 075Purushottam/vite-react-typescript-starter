@@ -15,6 +15,7 @@ interface MatchPair {
 
 interface MatchFollowingDialogProps {
   onCreateQuestion: (question: Question) => void;
+  onAddHeading: (text: string, alignment: 'left' | 'center') => void;
 }
 
 const chapters = [
@@ -30,7 +31,7 @@ const chapters = [
 
 const difficulties = ['Easy', 'Medium', 'Hard'] as const;
 
-export function MatchFollowingDialog({ onCreateQuestion }: MatchFollowingDialogProps) {
+export function MatchFollowingDialog({ onCreateQuestion, onAddHeading }: MatchFollowingDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [questionText, setQuestionText] = useState('');
   const [marks, setMarks] = useState(1);
@@ -77,19 +78,33 @@ export function MatchFollowingDialog({ onCreateQuestion }: MatchFollowingDialogP
       return;
     }
 
+    // Add the question text as a heading/section
+    onAddHeading(questionText.trim(), 'left');
+
     // Shuffle the right side items
     const shuffledPairs = shuffleRightSide(pairs);
 
+    // Build question_text with shuffled pairs
+    const questionTextContent = shuffledPairs.map((pair, index) => 
+      `(${String.fromCharCode(97 + index)})${pair.left} (${index + 1})${pair.right}`
+    ).join('\n');
+
+    // Build answer with correct right pairs
+    const correctAnswerText = pairs.map((pair, index) => 
+      `${index + 1}) ${pair.right}`
+    ).join('\n');
+
     const question: Question = {
       id: `match-${Date.now()}`,
-      question_text: questionText.trim(),
+      question_text: questionTextContent,
       type: 'Match the Following',
       difficulty: difficulty,
       marks: marks,
       book: 0, // Placeholder, should be set based on actual book selection
       subject: 0, // Placeholder, should be set based on actual subject selection
       chapter: Number(chapter),
-      matchPairs: shuffledPairs
+      answer: { text: correctAnswerText },
+      matchPairs: shuffledPairs // Keep for frontend display
     };
 
     onCreateQuestion(question);

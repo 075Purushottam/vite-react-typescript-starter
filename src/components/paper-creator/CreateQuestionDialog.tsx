@@ -45,31 +45,7 @@ export const CreateQuestionDialog = ({ onCreateQuestion, }: CreateQuestionDialog
     const [chaptersLoading, setChaptersLoading] = useState(false);
     const [chaptersError, setChaptersError] = useState<string | null>(null);
   
-    // useEffect(() => {
-    //   let isMounted = true;
-    //   (async () => {
-    //     setChaptersLoading(true);
-    //     setChaptersError(null);
-    //     const { data, error } = await supabase
-    //       .from('questionservice_chapter')
-    //       .select('*');
-    //     if (!isMounted) return;
-    //     if (error) {
-    //       setChaptersError('Failed to load chapters');
-    //       setChapters([]);
-    //     } else if (data) {
-    //       const names = data.map((row: any) => row.name || row.title || row.chapter_name || row.chapter || '');
-    //       setChapters(names.filter(Boolean));
-    //     }
-    //     setChaptersLoading(false);
-    //   })();
-    //   return () => { isMounted = false; };
-    // }, []);
-
-  // const chapters = selectedChapters.map(ch => ({
-  //   value: ch.chapterId,
-  //   label: `${ch.bookName} - ${ch.chapterName}`
-  //   }));
+   
   const chapters = [
     'Algebra', 'Geometry', 'Trigonometry', 'Calculus', 'Statistics', 
     'Probability', 'Number Theory', 'Coordinate Geometry'

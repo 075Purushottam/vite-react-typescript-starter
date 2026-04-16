@@ -67,11 +67,13 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
     if (input.includes('algebra') || input.includes('equation')) {
       const question: Question = {
         id: `ai-q-${Date.now()}`,
-        text: 'Solve for x: 3x + 7 = 22',
+        question_text: 'Solve for x: 3x + 7 = 22',
         type: 'Short Answer',
         difficulty: 'Medium',
         marks: 3,
-        chapter: 'Algebra'
+        chapter: 1,
+        book:1,
+        subject:1
       };
       return {
         text: 'I\'ve generated an algebra question for you. You can add it to your paper using the button below.',
@@ -80,11 +82,13 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
     } else if (input.includes('geometry') || input.includes('triangle')) {
       const question: Question = {
         id: `ai-q-${Date.now()}`,
-        text: 'In a right-angled triangle, if one angle is 30°, find the other two angles.',
+        question_text: 'In a right-angled triangle, if one angle is 30°, find the other two angles.',
         type: 'Short Answer',
         difficulty: 'Easy',
         marks: 2,
-        chapter: 'Geometry'
+        chapter: 2,
+        book:1,
+        subject:1
       };
       return {
         text: 'Here\'s a geometry question about triangles. Click the button below to add it to your paper.',
@@ -93,11 +97,13 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
     } else if (input.includes('easy') || input.includes('simple')) {
       const question: Question = {
         id: `ai-q-${Date.now()}`,
-        text: 'What is 15% of 200?',
+        question_text: 'What is 15% of 200?',
         type: 'Short Answer',
         difficulty: 'Easy',
         marks: 2,
-        chapter: 'Percentage'
+        chapter: 3,
+        book:1,
+        subject:1 
       };
       return {
         text: 'I\'ve created an easy percentage question for you.',
@@ -106,11 +112,13 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
     } else if (input.includes('hard') || input.includes('difficult')) {
       const question: Question = {
         id: `ai-q-${Date.now()}`,
-        text: 'Prove that the sum of squares of the sides of a parallelogram equals the sum of squares of its diagonals.',
+        question_text: 'Prove that the sum of squares of the sides of a parallelogram equals the sum of squares of its diagonals.',
         type: 'Long Answer',
         difficulty: 'Hard',
         marks: 5,
-        chapter: 'Geometry'
+        chapter: 2,
+        book:1,
+        subject:1 
       };
       return {
         text: 'Here\'s a challenging geometry proof question.',
@@ -189,7 +197,7 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
                     {message.generatedQuestion && (
                       <div className="mt-3 p-3 bg-card border border-border rounded-lg">
                         <p className="text-xs text-muted-foreground mb-2">Generated Question:</p>
-                        <p className="text-sm font-medium mb-2">{message.generatedQuestion.text}</p>
+                        <p className="text-sm font-medium mb-2">{message.generatedQuestion.question_text}</p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                             <Badge variant="outline" className="text-xs">
