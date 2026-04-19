@@ -1,12 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Play, BookOpen } from 'lucide-react';
 import { isLoggedIn } from '@/lib/auth';
 
-interface HeroProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile') => void;
-}
-
-const Hero = ({onNavigate} : HeroProps) => {
+const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Gradient Background */}
@@ -43,9 +41,9 @@ const Hero = ({onNavigate} : HeroProps) => {
                 // onClick={() => onNavigate('exam-form')}
                 onClick={() =>{
                   if (isLoggedIn()){
-                    onNavigate('exam-form')
+                    navigate('/exam-form')
                   } else {
-                    onNavigate('login')
+                    navigate('/login')
                   }
                 } }
                 className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center">

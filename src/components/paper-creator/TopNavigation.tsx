@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentUser } from '@/lib/auth';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 
 interface TopNavigationProps {
@@ -12,16 +13,15 @@ interface TopNavigationProps {
   setSearchQuery: (query: string) => void;
   totalQuestions: number;
   totalMarks: number;
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile', state?: any) => void;
 }
 
-export const TopNavigation = ({ 
-  searchQuery, 
-  setSearchQuery, 
-  totalQuestions, 
-  totalMarks,
-  onNavigate
+export const TopNavigation = ({
+  searchQuery,
+  setSearchQuery,
+  totalQuestions,
+  totalMarks
 }: TopNavigationProps) => {
+  const navigate = useNavigate();
     const [user, setUser] = useState(getCurrentUser());
     const [isToolInfoOpen, setIsToolInfoOpen] = useState(false);
     useEffect(() => {
@@ -67,7 +67,7 @@ export const TopNavigation = ({
 
         {/* Profile Section */}
         <div className="flex items-center space-x-3">
-          <button onClick={() => onNavigate('profile', {from: 'paper-creator'})}>
+          <button onClick={() => navigate('/profile', { state: { from: 'paper-creator' } })}>
             <Avatar>
               <AvatarImage src="/placeholder.svg" />
               <AvatarFallback className="bg-secondary text-secondary-foreground">

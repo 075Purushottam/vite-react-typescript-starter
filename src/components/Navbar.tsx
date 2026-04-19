@@ -193,14 +193,12 @@
 
 // export default Navbar;
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Menu, X, User, LogOut } from 'lucide-react';
 import { getCurrentUser, isLoggedIn, logoutUser } from '../lib/auth';
 
-interface NavbarProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile', state?: any) => void;
-}
-
-const Navbar = ({ onNavigate }: NavbarProps) => {
+const Navbar = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
@@ -263,7 +261,7 @@ const Navbar = ({ onNavigate }: NavbarProps) => {
     setUser(null);
     setUserLoggedIn(false);
     setIsMenuOpen(false);
-    onNavigate('home');
+    navigate('/');
   };
 
   return (
@@ -314,7 +312,7 @@ const Navbar = ({ onNavigate }: NavbarProps) => {
             {userLoggedIn && user ? (
               <>
                 <button 
-                  onClick={() => onNavigate('profile', {from: 'home'})}
+                  onClick={() => navigate('/profile', { state: { from: 'home' } })}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 ${
                     isScrolled 
                       ? 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' 
@@ -351,12 +349,12 @@ const Navbar = ({ onNavigate }: NavbarProps) => {
                     ? 'border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600' 
                     : 'border-white/30 text-white hover:border-white hover:bg-white hover:text-gray-900'
                 }`}
-                onClick={() => onNavigate('login')}>
+                onClick={() => navigate('/login')}>
                   Login
                 </button>
                 <button 
                   className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  onClick={() => onNavigate('signup')}>
+                  onClick={() => navigate('/signup')}>
                   Sign Up
                 </button>
               </>
@@ -418,7 +416,7 @@ const Navbar = ({ onNavigate }: NavbarProps) => {
                   <button 
                     className="w-full px-4 py-3 text-sm font-medium text-gray-700 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-300 flex items-center justify-center"
                     onClick={() => {
-                      onNavigate('profile');
+                      navigate('/profile');
                       setIsMenuOpen(false);
                     }}>
                     <User className="w-4 h-4 mr-2" />
@@ -438,7 +436,7 @@ const Navbar = ({ onNavigate }: NavbarProps) => {
                   <button 
                     className="w-full px-4 py-3 text-sm font-medium text-gray-700 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-300"
                     onClick={() => {
-                      onNavigate('login');
+                      navigate('/login');
                       setIsMenuOpen(false);
                     }}>
                     Login
@@ -446,7 +444,7 @@ const Navbar = ({ onNavigate }: NavbarProps) => {
                   <button 
                     className="w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={() => {
-                      onNavigate('signup');
+                      navigate('/signup');
                       setIsMenuOpen(false);
                     }}>
                     Sign Up

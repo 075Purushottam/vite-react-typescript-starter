@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import { 
-  BookOpen, 
-  ChevronDown, 
-  ChevronRight, 
-  Check, 
-  ArrowLeft, 
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Check,
+  ArrowLeft,
   ArrowRight,
   FileText,
   School,
@@ -25,10 +26,6 @@ interface ExamDetails {
   maxMarks: string;
   examInstructions: string;
 }
-interface BookSelectionProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile' | 'paper-creator', data?: any) => void;
-  examDetails: ExamDetails | null;
-}
 
 interface BookChapter {
   id: string;
@@ -44,7 +41,10 @@ interface BookWithChapters {
   allSelected: boolean;
 }
 
-const BookSelection = ({ onNavigate, examDetails }: BookSelectionProps) => {
+const BookSelection = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const examDetails = location.state?.examDetails;
   const [books, setBooks] = useState<BookWithChapters[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayNames, setDisplayNames] = useState({
@@ -60,10 +60,10 @@ const BookSelection = ({ onNavigate, examDetails }: BookSelectionProps) => {
   // Redirect if no exam details
   useEffect(() => {
     if (!examDetails) {
-      onNavigate('exam-form');
+      navigate('/exam-form');
       return;
     }
-  }, [examDetails, onNavigate]);
+  }, [examDetails, navigate]);
 
   // Load books and display names
   useEffect(() => {
@@ -200,11 +200,13 @@ const BookSelection = ({ onNavigate, examDetails }: BookSelectionProps) => {
     }
     
     console.log('Selected chapters:', selectedChapters);
-    
+
     // Navigate to PaperCreator with both exam details and selected chapters
-    onNavigate('paper-creator', {
-      examDetails: examDetails,
-      selectedChapters: selectedChapters
+    navigate('/paper-creator', {
+      state: {
+        examDetails: examDetails,
+        selectedChapters: selectedChapters
+      }
     });
   };
 
@@ -284,7 +286,7 @@ const BookSelection = ({ onNavigate, examDetails }: BookSelectionProps) => {
                 No books are available for the selected class, subject, and board combination.
               </p>
               <button
-                onClick={() => onNavigate('exam-form')}
+                onClick={() => navigate('/exam-form')}
                 className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg hover:from-emerald-700 hover:to-blue-700 transition-all duration-300"
               >
                 Change Selection
@@ -385,7 +387,7 @@ const BookSelection = ({ onNavigate, examDetails }: BookSelectionProps) => {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
           <button
-            onClick={() => onNavigate('exam-form')}
+            onClick={() => navigate('/exam-form')}
             className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-emerald-500 hover:text-emerald-600 transition-all duration-300 flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -404,7 +406,7 @@ const BookSelection = ({ onNavigate, examDetails }: BookSelectionProps) => {
         {/* Back to Home Link */}
         <div className="text-center mt-8">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             className="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300 hover:underline"
           >
             ← Back to Home

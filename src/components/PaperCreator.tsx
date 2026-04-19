@@ -2,6 +2,7 @@ import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { TopNavigation } from './paper-creator/TopNavigation';
 import { LeftSidebar } from './paper-creator/LeftSidebar';
 import { QuestionLibrary } from './paper-creator/QuestionLibrary';
@@ -13,27 +14,6 @@ import type { Question, PaperItem, Heading } from '@/types/paper';
 import { examService, supabase } from "@/lib/supabase";
 import { Book } from 'lucide-react';
 import PaperPreviewPage from './paper-creator/PaperPreviewPage';
-// import { useNavigate } from "react-router-dom";
-
-
-
-interface PaperCreatorProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile' | 'paper-creator' | 'paper-preview', data?: any) => void;
-  examDetails: {
-    schoolName: string;
-    classId: string;
-    subjectId: string;
-    boardId: string;
-    examName: string;
-    timeDuration: string;
-  };
-  selectedChapters: Array<{
-    id: string;
-    name: string;
-    bookName: string;
-    bookId: number;
-  }>;
-}
 
 const STORAGE_KEY = "paperCreatorState";
 
@@ -55,10 +35,22 @@ const loadPaperCreatorState = () => {
   }
 };
 
-export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: PaperCreatorProps) => {
-
+export const PaperCreator = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const examDetails = location.state?.examDetails;
+  const selectedChapters = location.state?.selectedChapters;
 
   const savedState = loadPaperCreatorState();
+
+  // State for selectedChapters with localStorage fallback
+  const [selectedChaptersState, setSelectedChaptersState] = useState(() => {
+    const saved = localStorage.getItem('selectedChapters');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  // Determine which selectedChapters to use
+  const finalSelectedChapters = selectedChapters || selectedChaptersState || [];
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [paperItems, setPaperItems] = useState<PaperItem[]>(() => savedState?.paperItems || []);
@@ -90,8 +82,15 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
       localStorage.setItem('examDetails', JSON.stringify(examDetails));
       console.log("Exam Details saved to localStorage in PaperCreator.tsx:", examDetails);
     }
-    // examDetails = examDetailsState || examDetails;
   }, [examDetails]);
+
+  useEffect(() => {
+    if (selectedChapters) {
+      setSelectedChaptersState(selectedChapters);
+      localStorage.setItem('selectedChapters', JSON.stringify(selectedChapters));
+      console.log("Selected Chapters saved to localStorage in PaperCreator.tsx:", selectedChapters);
+    }
+  }, [selectedChapters]);
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -127,8 +126,7 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
         if (response.success) {
           alert("Paper saved successfully!");
           // localStorage.removeItem("paperCreatorState");
-          onNavigate('paper-preview', { paperData: paperData }); // Pass paperData to preview page
-          // navigate("/paper-preview", { state: { paperData } });
+          navigate('/paper-preview', { state: { paperData: paperData } }); // Pass paperData to preview page
         } else {
           alert(response.message || "Failed to save paper");
         }
@@ -147,11 +145,11 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
   useEffect(() => {
     async function fetchQuestions() {
       setLoading(true);
-      console.log("Selected Chapters:", selectedChapters);
-      const chapterIds = selectedChapters.map(ch => ch.id);
+      console.log("Selected Chapters:", finalSelectedChapters);
+      const chapterIds = finalSelectedChapters?.map((ch: any) => ch.id) || [];
 
       const params = new URLSearchParams();
-      chapterIds.forEach(id => params.append("chapter_ids", id));
+      chapterIds.forEach((id: string) => params.append("chapter_ids", id));
 
       const res = await fetch(
         `http://localhost:8000/api/v1/questions/by-chapters/?${params.toString()}`
@@ -164,10 +162,10 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
       setLoading(false);
     }
 
-    if (selectedChapters.length > 0) {
+    if (finalSelectedChapters && finalSelectedChapters.length > 0) {
       fetchQuestions();
     }
-  }, [selectedChapters]);
+  }, [finalSelectedChapters]);
 
 
   const allQuestions = [...questions, ...customQuestions];
@@ -359,7 +357,6 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
           setSearchQuery={setSearchQuery}
           totalQuestions={totalQuestions}
           totalMarks={totalMarks}
-          onNavigate={onNavigate}
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -370,12 +367,12 @@ export const PaperCreator = ({ onNavigate, examDetails, selectedChapters }: Pape
             onCreateQuestion={handleCreateQuestion}
             onMergeQuestions={handleMergeQuestions}
             onSplitQuestion={handleSplitQuestion}
-            selectedChapters={selectedChapters.map(ch => ({
+            selectedChapters={finalSelectedChapters?.map((ch: any) => ({
               bookName: ch.bookName,
               chapterName: ch.name,
               chapterId: ch.id,
               bookId: ch.bookId.toString()
-            }))}
+            })) || []}
             onSavePaper={handleSavePaper}
           />
 

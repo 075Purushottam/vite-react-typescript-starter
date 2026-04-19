@@ -1,13 +1,11 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Mail, Lock, User, Eye, EyeOff, BookOpen, PenTool, FileCheck, CheckCircle, AlertCircle } from 'lucide-react';
 import { signupUser, validateEmail, validatePassword } from '../lib/auth';
 
-interface SignUpProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile') => void;
-}
-
-const SignUp = ({ onNavigate }: SignUpProps) => {
+const SignUp = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,7 +92,7 @@ const SignUp = ({ onNavigate }: SignUpProps) => {
         });
         // Redirect to login after 2 seconds
         setTimeout(() => {
-          onNavigate('login');
+          navigate('/login');
         }, 2000);
       } else {
         setMessage({ type: 'error', text: 'An unexpected Signup error occurred. Please try again.' });
@@ -130,7 +128,7 @@ const SignUp = ({ onNavigate }: SignUpProps) => {
         {/* Back to Home Button */}
         <div className="mb-6">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             className="flex items-center text-gray-600 hover:text-teal-600 transition-colors duration-300 group"
           >
             <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center mr-2 group-hover:bg-teal-50 transition-colors duration-300">
@@ -324,7 +322,7 @@ const SignUp = ({ onNavigate }: SignUpProps) => {
                 Already have an account?{' '}
                 <a
                   href="#"
-                  onClick={() => onNavigate('login')}
+                  onClick={() => navigate('/login')}
                   className="text-teal-600 hover:text-teal-700 font-medium transition-colors duration-300 hover:underline"
                 >
                   Sign In
