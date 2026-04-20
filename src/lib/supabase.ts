@@ -1,12 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-// import { error } from 'console';
-
-// const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-// const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-// const supabase = createClient(supabaseUrl, supabaseKey);
-
-// export default supabase;
 
 import { normalizeArrayResponse } from '@/types/api';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -52,10 +44,7 @@ const BASE_API_URL = 'http://localhost:8000/api/v1' // Replace with your actual 
 export const examService = {
   // Fetch all classes
   async getClasses(): Promise<Class[]> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_schoolclass')
-    //   .select('id, name')
-    //   .order('name')
+   
     const res = await fetch(`${BASE_API_URL}/classes/`)
     
     if (!res.ok) {
@@ -68,10 +57,7 @@ export const examService = {
 
   // Fetch all boards
   async getBoards(): Promise<Board[]> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_board')
-    //   .select('id, name')
-    //   .order('name')
+    
       const res = await fetch(`${BASE_API_URL}/boards/`)
     
     if (!res.ok) {
@@ -85,11 +71,7 @@ export const examService = {
 
   // Fetch subjects by class_id
   async getSubjectsByClass(classId: number): Promise<Subject[]> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_subject')
-    //   .select('id, name, school_class_id')
-    //   .eq('school_class_id', classId)
-    //   .order('name')
+   
     const res = await fetch(`${BASE_API_URL}/subjects/by-class/${classId}/`)
     
     if (!res.ok) {
@@ -109,13 +91,7 @@ export const examService = {
 
   // Fetch books by class_id, subject_id, and board_id
   async getBooks(classId: number, subjectId: number, boardId: number): Promise<Book[]> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_book')
-    //   .select('id, title, author, school_class_id, subject_id, board_id')
-    //   .eq('school_class_id', classId)
-    //   .eq('subject_id', subjectId)
-    //   .eq('board_id', boardId)
-    //   .order('title')
+  
     const res = await fetch(`${BASE_API_URL}/books/by-filters/?class_id=${classId}&subject_id=${subjectId}&board_id=${boardId}`)
     if (!res.ok) {
       console.error('Error fetching books:', res.status, res.statusText)
@@ -137,11 +113,7 @@ export const examService = {
 
   // Fetch chapters by book_id
   async getChaptersByBook(bookId: number): Promise<Chapter[]> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_chapter')
-    //   .select('id, name, chapter_number, book_id')
-    //   .eq('book_id', bookId)
-    //   .order('chapter_number')
+   
     
     const res = await fetch(`${BASE_API_URL}/chapters/by-book/?book_id=${bookId}`)
     
@@ -156,11 +128,7 @@ export const examService = {
 
   // Get class name by ID
   async getClassName(classId: number): Promise<string> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_schoolclass')
-    //   .select('name')
-    //   .eq('id', classId)
-    //   .single()
+   
     const res = await fetch(`${BASE_API_URL}/classes/name/?class_id=${classId}`)
     if (!res.ok) {
       console.error('Error fetching class name:', res.status, res.statusText)
@@ -168,19 +136,13 @@ export const examService = {
     }
     
     const data = await res.json();
-    // console.log('Class name data:', data);
-    // const datanew = normalizeArrayResponse(data);
-    // console.log('Normalized class name data:', datanew);
+   
     return data?.name || 'Unknown Class'
   },
 
   // Get subject name by ID
   async getSubjectName(subjectId: number): Promise<string> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_subject')
-    //   .select('name')
-    //   .eq('id', subjectId)
-    //   .single()
+   
     
     const res = await fetch(`${BASE_API_URL}/subjects/name/?subject_id=${subjectId}`)
     if (!res.ok) {
@@ -195,11 +157,7 @@ export const examService = {
 
   // Get board name by ID
   async getBoardName(boardId: number): Promise<string> {
-    // const { data, error } = await supabase
-    //   .from('questionservice_board')
-    //   .select('name')
-    //   .eq('id', boardId)
-    //   .single()
+    
     
     const res = await fetch(`${BASE_API_URL}/boards/name/?board_id=${boardId}`)
     if (!res.ok) {
