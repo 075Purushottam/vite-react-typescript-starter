@@ -47,8 +47,7 @@ export const CreateQuestionDialog = ({ onCreateQuestion, }: CreateQuestionDialog
   
    
   const chapters = [
-    'Algebra', 'Geometry', 'Trigonometry', 'Calculus', 'Statistics', 
-    'Probability', 'Number Theory', 'Coordinate Geometry'
+     'custom chapter'
   ];
 
   const questionTypes: Question['type'][] = [

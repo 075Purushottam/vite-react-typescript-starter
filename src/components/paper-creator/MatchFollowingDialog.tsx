@@ -19,14 +19,7 @@ interface MatchFollowingDialogProps {
 }
 
 const chapters = [
-  'Mathematics',
-  'Science', 
-  'English',
-  'History',
-  'Geography',
-  'Physics',
-  'Chemistry',
-  'Biology'
+  'custom chapter'
 ];
 
 const difficulties = ['Easy', 'Medium', 'Hard'] as const;
