@@ -10,8 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 // import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { isQuestion, isHeading } from '@/types/paper';
-import type { Heading, PaperItem } from '@/types/paper';
-import type { QuestionWithNumber, Question } from '@/types/paper';
+import type { Heading, PaperItem, Question } from '@/types/paper';
 import { useState } from 'react';
 import { examService } from '../../lib/supabase'
 
@@ -40,7 +39,7 @@ interface SortableItemProps {
   onUpdate?: (itemId: string, updates: Partial<PaperItem>) => void;
 }
 
-const SortableItem = ({ item, index, questionNumber, sectionNumber, onRemove, onUpdate }: SortableItemProps) => {
+const SortableItem = ({ item, index: _index, questionNumber, sectionNumber, onRemove, onUpdate }: SortableItemProps) => {
   const {
     attributes,
     listeners,
@@ -52,6 +51,7 @@ const SortableItem = ({ item, index, questionNumber, sectionNumber, onRemove, on
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [marksValue, setMarksValue] = useState(() => isQuestion(item) ? String(item.marks) : '0');
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -80,6 +80,21 @@ const SortableItem = ({ item, index, questionNumber, sectionNumber, onRemove, on
       handleEditSave();
     } else if (e.key === 'Escape') {
       handleEditCancel();
+    }
+  };
+
+  const handleMarksChange = (value: string) => {
+    setMarksValue(value);
+  };
+
+  const handleMarksBlur = () => {
+    const parsed = Number(marksValue);
+    if (isQuestion(item) && onUpdate && marksValue !== '' && !Number.isNaN(parsed)) {
+      onUpdate(item.id, { marks: parsed });
+    } else if (isQuestion(item)) {
+      setMarksValue(String(item.marks));
+    } else {
+      setMarksValue('0');
     }
   };
 
@@ -149,6 +164,7 @@ const SortableItem = ({ item, index, questionNumber, sectionNumber, onRemove, on
       ref={setNodeRef}
       style={style}
       className={`group flex items-center py-1 px-2 rounded ${isDragging ? 'opacity-50' : ''}`}
+      title={`Type: ${item.type || 'Unknown'}${item.difficulty ? ` | Difficulty: ${item.difficulty}` : ''}`}
       {...attributes}
       {...listeners}
     >
@@ -210,12 +226,21 @@ const SortableItem = ({ item, index, questionNumber, sectionNumber, onRemove, on
               )}
             </>
           )}
-        <span className="text-sm font-medium text-foreground whitespace-nowrap ml-4 mr-2">
-          [{item.marks}]
-        </span>
-
-
-
+        <div className="flex items-center ml-4">
+          <span className="text-sm font-medium text-foreground whitespace-nowrap">[</span>
+          <Input
+            type="number"
+            min={0}
+            value={marksValue}
+            onChange={(e) => handleMarksChange(e.target.value)}
+            onBlur={handleMarksBlur}
+            // className="no-spinner w-auto min-w-0 max-w-6 h-6 px-0 py-0 text-sm font-medium text-foreground bg-transparent !border-none !rounded-none !shadow-none focus:bg-transparent focus:border-none focus:ring-0 focus-visible:outline-none !outline-none"
+            className="no-spinner w-auto h-5 border-0 outline-none rounded-none bg-transparent p-0 m-0 focus:outline-0 focus:ring-0 text-center"
+            style={{width: `${Math.max(2, marksValue.length)}ch`}}
+            onPointerDown={(e) => e.stopPropagation()}
+          />
+          <span className="text-sm font-medium text-foreground whitespace-nowrap">]</span>
+        </div>
       </div>
     </div>
   );
@@ -252,7 +277,7 @@ export const PaperPreview = ({ items, onRemoveItem, onUpdateItem, setPaperData, 
     let currentSection: any = null;
 
     itemsWithNumbers.forEach((item: any) => {
-      console.log("Processing item:", item);
+      // console.log("Processing item:", item);
       if (isHeading(item)) {
         currentSection = {
           sectionTitle: item.text,
@@ -279,14 +304,15 @@ export const PaperPreview = ({ items, onRemoveItem, onUpdateItem, setPaperData, 
       paperDetails: {
         schoolName: paperInfo.school,
         examName: paperInfo.title,
-        class: paperInfo.class,
-        subject: paperInfo.subject,
+        class: className,
+        subject: subjectName,
         time: paperInfo.duration,
         date: new Date().toLocaleDateString(),
         maxMarks: totalMarks,
         board_id: paperInfo.board_id,
         class_id: paperInfo.class_id,
         subject_id: paperInfo.subject_id,
+        instructions: paperInfo.instructions
       },
       sections
     };

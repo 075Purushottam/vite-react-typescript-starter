@@ -1,14 +1,11 @@
 
 import React, { useState } from 'react';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, School, BookOpen, Clock, Award, FileCheck, RotateCcw, ArrowRight } from 'lucide-react';
 import { examService } from '../lib/supabase';
 import type { Class, Board, Subject } from '../lib/supabase';
 import { mockClasses, mockSubjects, mockBoards } from '../types/mockData';
-
-interface ExamDetailsFormProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile',data?:any) => void;
-}
 
 interface ExamFormData {
   schoolName: string;
@@ -20,7 +17,8 @@ interface ExamFormData {
   maxMarks: string;
   examInstructions: string;
 }
-const ExamDetailsForm = ({ onNavigate }: ExamDetailsFormProps) => {
+const ExamDetailsForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<ExamFormData>({
     schoolName: '',
     examName: '',
@@ -123,7 +121,7 @@ const ExamDetailsForm = ({ onNavigate }: ExamDetailsFormProps) => {
     if (validateForm()) {
       console.log('Form submitted:', formData);
       // Navigate to book selection page with form data
-      onNavigate('book-selection',{examDetails: formData});
+      navigate('/book-selection', { state: { examDetails: formData } });
     }
   };
 
@@ -398,7 +396,7 @@ const ExamDetailsForm = ({ onNavigate }: ExamDetailsFormProps) => {
         {/* Back to Home Link */}
         <div className="text-center mt-8">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-300 hover:underline"
           >
             ← Back to Home

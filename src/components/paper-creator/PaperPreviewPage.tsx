@@ -1,5 +1,5 @@
 
-// import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -52,14 +52,16 @@ interface PaperData {
 }
 
 interface PaperPreviewPageProps {
-  onNavigate: (page: string, data?: any) => void;
-  paperData: PaperData;
+  paperData?: PaperData; // Make it optional since we'll get it from state
 }
 
-const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
-//   const location = useLocation();
-//   const navigate = useNavigate();
+const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const paperRef = useRef<HTMLDivElement>(null);
+
+  // Get paperData from navigation state or props
+  const paperData = location.state?.paperData || propPaperData;
   const generatePDF = useCallback(async (includeAnswers: boolean) => {
     if (!paperRef.current) return;
     const canvas = await html2canvas(paperRef.current, {
@@ -95,7 +97,7 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
   const styleMap: Record<string, string> = {
     header: "text-center font-bold text-xl mb-1",
     subheader: "text-center font-bold text-lg mb-2.5",
-    sectionHeader: "font-bold text-base mt-2.5 mb-1",
+    sectionHeader: "font-bold text-base mt-2.5 mb-1 flex w-full items-start",
     answerText: "italic text-green-600 ml-5 mt-0.5 mb-1"
   };
 
@@ -129,11 +131,23 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
 
     // Sections
     paperData.sections.forEach((sectionData, sidx) => {
-      // elements.push(
-      //   <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
-      //     {sectionData.sectionTitle}
-      //   </div>
-      // );
+      const questionType = sectionData.questions[0]?.type;
+        const hasSingleMatchQuestion =
+        sectionData.questions.length === 1 && questionType!== undefined &&
+        [
+          "Match the Following",
+          // add more types here if needed
+        ].includes(questionType);
+      elements.push(
+        <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
+          <span>{sidx + 1}. {sectionData.sectionTitle}</span>
+          {hasSingleMatchQuestion && (
+            <span className="ml-auto">
+              [{sectionData.questions[0].marks}]
+            </span>
+          )}
+        </div>
+      );
 
       sectionData.questions.forEach((q, qidx) => {
         if (q.type === 'Match the Following') {
@@ -148,10 +162,10 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
 
           elements.push(
             <div key={`q-${sidx}-${qidx}`} className="my-1.5">
-              <div className="flex justify-between mb-3">
+              {/* <div className="flex justify-between mb-3">
                 <div className="flex-1">{q.qno}. {sectionData.sectionTitle}</div>
                 <div className="ml-2">[{q.marks}]</div>
-              </div>
+              </div> */}
               <div className="grid grid-cols-2 gap-x-20 gap-y-2 pl-5">
                 {pairs.map((pair: any, index: number) => (
                   <>
@@ -203,7 +217,7 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
           <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
           <h2 className="text-xl font-semibold text-foreground">No Paper Data</h2>
           <p className="text-muted-foreground">No paper data found. Please go back and create a paper first.</p>
-          <Button onClick={() => onNavigate('paper-creator')} variant="outline">
+          <Button onClick={() => navigate('/paper-creator')} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Editor
           </Button>
@@ -214,7 +228,7 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
 
   const { paperDetails, sections } = paperData;
   const totalMarks = paperDetails.maxMarks ?? sections.reduce(
-    (sum, s) => sum + s.questions.reduce((qs, q) => qs + q.marks, 0), 0
+    (sum: number, s: any) => sum + s.questions.reduce((qs: number, q: any) => qs + q.marks, 0), 0
   );
 
   return (
@@ -222,7 +236,7 @@ const PaperPreviewPage = ({ onNavigate, paperData }: PaperPreviewPageProps) => {
       {/* Sticky Toolbar */}
       <div className="sticky top-0 z-50 bg-card border-b border-border shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => onNavigate('paper-creator')} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" onClick={() => navigate('/paper-creator')} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Editor
           </Button>
@@ -290,7 +304,17 @@ export default PaperPreviewPage;
     {
       canvas: [{ type: "line", x1: 0, y1: 0, x2: 520, y2: 0, lineWidth: 1 }],
       margin: [0, 10, 0, 10]
-    }
+    },
+    ...(details.instructions && details.instructions.length > 0
+      ? [
+          { text: "Instructions:", style: "sectionHeader" },
+          ...details.instructions.map((i: string) => ({ text: i, style: "" }))
+        ]
+      : []),
+      {
+      canvas: [{ type: "line", x1: 0, y1: 0, x2: 520, y2: 0, lineWidth: 1 }],
+      margin: [0, 10, 0, 10]
+      },
   ]);
 
   const getBaseDocDefinition = (content: any[]) => ({
@@ -331,11 +355,45 @@ export default PaperPreviewPage;
     const details = paperData.paperDetails;
     const content: any[] = [...buildHeader(details)];
 
-    paperData.sections.forEach((sectionData: any) => {
+    paperData.sections.forEach((sectionData: any,sidx: any) => {
+      const questionType = sectionData.questions[0]?.type;
+        const hasSingleMatchQuestion =
+        sectionData.questions.length === 1 && questionType!== undefined &&
+        [
+          "Match the Following",
+        ].includes(questionType);
+        content.push({
+      columns: [
+        {
+          text: `${sidx + 1}. ${sectionData.sectionTitle}`,
+          style: "sectionHeader",
+        },
+        hasSingleMatchQuestion
+          ? {
+              text: `[${sectionData.questions[0].marks}]`,
+              alignment: "right",
+              width: 30,
+              margin: [0, 2, 0, 0],
+            }
+          : { text: "" },
+      ],
+    });
+      // content.push(
+      //   <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
+      //     <span>{sidx + 1}. {sectionData.sectionTitle}</span>
+      //     {hasSingleMatchQuestion && (
+      //       <span className="ml-auto">
+      //         [{sectionData.questions[0].marks}]
+      //       </span>
+      //     )}
+      //   </div>
+      //   // <div className="ml-2">[{sectionData.questions[0]?.marks}]</div>
+      // );
       // content.push({
       //   text: sectionData.sectionTitle,
       //   style: "sectionHeader"
       // });
+      
 
       sectionData.questions.forEach((q: any) => {
         if (q.type === 'Match the Following') {
@@ -348,13 +406,13 @@ export default PaperPreviewPage;
             return null;
           }).filter(Boolean);
 
-          content.push({
-            columns: [
-              { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
-              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
-            ],
-            margin: [0, 5]
-          });
+          // content.push({
+          //   columns: [
+          //     { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
+          //     { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+          //   ],
+          //   margin: [0, 5]
+          // });
 
           content.push({
             columns: [
@@ -419,11 +477,29 @@ export default PaperPreviewPage;
     // Add Answer Sheet Title
     content.splice(2, 0, { text: "ANSWER SHEET", style: "sectionHeader", alignment: "center" });
 
-    paperData.sections.forEach((sectionData: any) => {
-      // content.push({
-      //   text: sectionData.sectionTitle,
-      //   style: "sectionHeader"
-      // });
+    paperData.sections.forEach((sectionData: any,sidx: any) => {
+    const questionType = sectionData.questions[0]?.type;
+        const hasSingleMatchQuestion =
+        sectionData.questions.length === 1 && questionType!== undefined &&
+        [
+          "Match the Following",
+        ].includes(questionType);
+        content.push({
+      columns: [
+        {
+          text: `${sidx + 1}. ${sectionData.sectionTitle}`,
+          style: "sectionHeader",
+        },
+        hasSingleMatchQuestion
+          ? {
+              text: `[${sectionData.questions[0].marks}]`,
+              alignment: "right",
+              width: 30,
+              margin: [0, 2, 0, 0],
+            }
+          : { text: "" },
+      ],
+    }); 
 
       sectionData.questions.forEach((q: any) => {
         if (q.type === 'Match the Following') {
@@ -436,13 +512,13 @@ export default PaperPreviewPage;
             return null;
           }).filter(Boolean);
 
-          content.push({
-            columns: [
-              { text: `${q.qno}. ${sectionData.sectionTitle}`, width: "*" },
-              { text: `[${q.marks}]`, width: "auto", alignment: "right" }
-            ],
-            margin: [0, 5]
-          });
+          // content.push({
+          //   columns: [
+          //     { text: `${q.qno}. ${q.answer}`, width: "*" },
+          //     { text: `[${q.marks}]`, width: "auto", alignment: "right" }
+          //   ],
+          //   margin: [0, 5]
+          // });
 
           if (q.answer) {
             // For match questions, show left items paired with correct answers
@@ -460,8 +536,9 @@ export default PaperPreviewPage;
                 {
                   width: "*",
                   stack: answerLines.map((line: string) => ({
-                    text: line,
-                    margin: [0, 3, 0, 3]
+                    text: `Answer: ${line}`,
+                    margin: [0, 3, 0, 3],
+                    style: "answerText"
                   }))
                 }
               ],

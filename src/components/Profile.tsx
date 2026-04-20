@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { examService } from '../lib/supabase';
 import { getCurrentUser } from '../lib/auth';
 
-import { 
-  User, 
-  Mail, 
-  Crown, 
-  Calendar, 
-  FileText, 
-  Edit, 
-  Eye, 
-  Search, 
-  Filter, 
+import {
+  User,
+  Mail,
+  Crown,
+  Calendar,
+  FileText,
+  Edit,
+  Eye,
+  Search,
+  Filter,
   Upload,
   ArrowLeft,
   BookOpen,
@@ -20,11 +21,6 @@ import {
   Clock,
   MoreVertical
 } from 'lucide-react';
-
-interface ProfileProps {
-  onNavigate: (page: 'home' | 'login' | 'signup' | 'exam-form' | 'book-selection' | 'profile' | 'paper-creator') => void;
-  navigationState?: any; // Optional state to pass when navigating to profile (e.g., { from: 'home' })
-}
 
 interface Paper {
   id: string;
@@ -39,19 +35,22 @@ interface Paper {
   duration: number;
 }
 
-const Profile = ({ onNavigate, navigationState }: ProfileProps) => {
+const Profile = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const navigationState = location.state;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBy, setFilterBy] = useState('all');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [papers, setPapers] = useState<Paper []>([]);
   const [user, setUser] = useState(getCurrentUser());
-  const from = navigationState;
-  console.log("From :",from);
+  const from = navigationState?.from;
+  console.log("From :", from);
   const handleBack = () => {
-  if (from === 'paper-creator') {
-      onNavigate('paper-creator');
+    if (from === 'paper-creator') {
+      navigate('/paper-creator');
     } else {
-      onNavigate('home');
+      navigate('/');
     }
   };
   // Mock user data
@@ -74,7 +73,7 @@ const Profile = ({ onNavigate, navigationState }: ProfileProps) => {
           id: paper.id,
           title: paper.title,
           examName: paper.exam_name,
-          class: paper.class_name,
+          class: paper.school_class,
           subject: paper.subject,
           board: paper.board,
           createdDate: paper.created_at.split("T")[0],
@@ -92,71 +91,7 @@ const Profile = ({ onNavigate, navigationState }: ProfileProps) => {
     loadPapers();
   }, []);
 
-  // Mock papers data
-  // const [papers] = useState<Paper[]>([
-  //   {
-  //     id: '1',
-  //     title: 'Mathematics Midterm Examination',
-  //     examName: 'Mid-Term Exam 2025',
-  //     class: '10',
-  //     subject: 'Mathematics',
-  //     board: 'CBSE',
-  //     createdDate: '2025-01-15',
-  //     createdTime: '10:30 AM',
-  //     maxMarks: 100,
-  //     duration: 180
-  //   },
-  //   {
-  //     id: '2',
-  //     title: 'Science Unit Test - Physics',
-  //     examName: 'Unit Test 3',
-  //     class: '12',
-  //     subject: 'Physics',
-  //     board: 'CBSE',
-  //     createdDate: '2025-01-12',
-  //     createdTime: '2:15 PM',
-  //     maxMarks: 50,
-  //     duration: 120
-  //   },
-  //   {
-  //     id: '3',
-  //     title: 'English Literature Assessment',
-  //     examName: 'Monthly Assessment',
-  //     class: '11',
-  //     subject: 'English',
-  //     board: 'MP Board',
-  //     createdDate: '2025-01-10',
-  //     createdTime: '9:45 AM',
-  //     maxMarks: 80,
-  //     duration: 150
-  //   },
-  //   {
-  //     id: '4',
-  //     title: 'Chemistry Practical Exam',
-  //     examName: 'Practical Examination',
-  //     class: '12',
-  //     subject: 'Chemistry',
-  //     board: 'CBSE',
-  //     createdDate: '2025-01-08',
-  //     createdTime: '11:20 AM',
-  //     maxMarks: 30,
-  //     duration: 90
-  //   },
-  //   {
-  //     id: '5',
-  //     title: 'History Chapter Test',
-  //     examName: 'Chapter Test',
-  //     class: '9',
-  //     subject: 'Social Science',
-  //     board: 'MP Board',
-  //     createdDate: '2025-01-05',
-  //     createdTime: '3:30 PM',
-  //     maxMarks: 40,
-  //     duration: 60
-  //   }
-  // ]);
 
-  // Filter papers based on search and filter
   const filteredPapers = papers.filter(paper => {
     const matchesSearch = paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          paper.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -296,7 +231,7 @@ const Profile = ({ onNavigate, navigationState }: ProfileProps) => {
                 className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm appearance-none cursor-pointer"
               >
                 <option value="all">All Papers</option>
-                <option value="6">Class 6</option>
+                <option value="Class 6">Class 6</option>
                 <option value="7">Class 7</option>
                 <option value="8">Class 8</option>
                 <option value="9">Class 9</option>
@@ -338,7 +273,7 @@ const Profile = ({ onNavigate, navigationState }: ProfileProps) => {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-sm text-gray-600">
                         <School className="w-4 h-4 mr-2 text-blue-500" />
-                        Class {paper.class} • {paper.subject}
+                        {paper.class} • {paper.subject}
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
                         <Award className="w-4 h-4 mr-2 text-purple-500" />
@@ -386,7 +321,7 @@ const Profile = ({ onNavigate, navigationState }: ProfileProps) => {
                   : 'Create your first question paper to get started.'}
               </p>
               <button
-                onClick={() => onNavigate('exam-form')}
+                onClick={() => navigate('/exam-form')}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
               >
                 Create New Paper

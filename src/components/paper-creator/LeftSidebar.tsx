@@ -40,7 +40,7 @@ export const LeftSidebar = ({ filters, setFilters, onSavePaper, onAddHeading, on
 
   useEffect(()=>{
     console.log("Selected Chapters in left side: ",selectedChapters);
-  })
+  }, [selectedChapters])
 
   useEffect(() => {
     let isMounted = true;
@@ -58,10 +58,10 @@ export const LeftSidebar = ({ filters, setFilters, onSavePaper, onAddHeading, on
       // } else if (data) {
         // const names = data.map((row: any) => row.chapterName);
         // setChapters(names.filter(Boolean));
-            const formatted = data.map((row: any) => ({
+            const formatted = data && data.length > 0 ? data.map((row: any) => ({
               chapterId: row.chapterId,
               chapterName: row.chapterName,
-            }));
+            })) : [];
 
             setChapters(formatted);
 
@@ -69,7 +69,7 @@ export const LeftSidebar = ({ filters, setFilters, onSavePaper, onAddHeading, on
       setChaptersLoading(false);
     })();
     return () => { isMounted = false; };
-  }, []);
+  }, [selectedChapters]);
 
   // const questionTypes = [
   //   'MCQ', 'Short Answer', 'Long Answer', 'True False', 'Fill in the Blank', 'Match the Following'
