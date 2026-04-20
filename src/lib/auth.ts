@@ -25,81 +25,6 @@ export interface AuthResponse {
   message: string;
   user?: User;
 }
-
-// Hash password
-// const hashPassword = async (password: string): Promise<string> => {
-//   const saltRounds = 12;
-//   return await bcrypt.hash(password, saltRounds);
-// };
-
-// // Verify password
-// const verifyPassword = async (password: string, hashedPassword: string): Promise<boolean> => {
-//   return await bcrypt.compare(password, hashedPassword);
-// };
-
-// Check if email exists
-// const checkEmailExists = async (email: string): Promise<boolean> => {
-//   const { data, error } = await supabase
-//     .from('users')
-//     .select('id')
-//     .eq('email', email.toLowerCase())
-//     .single();
-  
-//   return !error && data !== null;
-// };
-
-// Signup function
-// export const signupUser = async (signupData: SignupData): Promise<AuthResponse> => {
-//   try {
-//     const { name, email, password } = signupData;
-    
-//     // Check if email already exists
-//     const emailExists = await checkEmailExists(email);
-//     if (emailExists) {
-//       return {
-//         success: false,
-//         message: 'Email already registered, please login.'
-//       };
-//     }
-    
-//     // Hash password
-//     const hashedPassword = await hashPassword(password);
-    
-//     // Insert user into database
-//     const { data, error } = await supabase
-//       .from('users')
-//       .insert([
-//         {
-//           name: name.trim(),
-//           email: email.toLowerCase().trim(),
-//           password: hashedPassword
-//         }
-//       ])
-//       .select('id, name, email, created_at, updated_at')
-//       .single();
-    
-//     if (error) {
-//       console.error('Signup error:', error);
-//       return {
-//         success: false,
-//         message: 'Failed to create account. Please try again.'
-//       };
-//     }
-    
-//     return {
-//       success: true,
-//       message: 'Account created successfully! Please login.',
-//       user: data
-//     };
-    
-//   } catch (error) {
-//     console.error('Signup error:', error);
-//     return {
-//       success: false,
-//       message: 'An unexpected error occurred. Please try again.'
-//     };
-//   }
-// };
 export const signupUser = async (signupData: SignupData): Promise<AuthResponse> => {
   try {
     const response = await fetch('http://127.0.0.1:8000/api/v1/signup/', {
@@ -122,61 +47,7 @@ export const signupUser = async (signupData: SignupData): Promise<AuthResponse> 
   }
 };
 
-// Login function
-// export const loginUser = async (loginData: LoginData): Promise<AuthResponse> => {
-//   try {
-//     const { email, password } = loginData;
-    
-//     // Get user from database
-//     const { data: user, error } = await supabase
-//       .from('users')
-//       .select('id, name, email, password, created_at, updated_at')
-//       .eq('email', email.toLowerCase().trim())
-//       .single();
-    
-//     if (error || !user) {
-//       return {
-//         success: false,
-//         message: 'Invalid email or password.'
-//       };
-//     }
-    
-//     // Verify password
-//     const isPasswordValid = await verifyPassword(password, user.password);
-//     if (!isPasswordValid) {
-//       return {
-//         success: false,
-//         message: 'Invalid email or password.'
-//       };
-//     }
-    
-//     // Create session
-//     const sessionData = {
-//       id: user.id,
-//       name: user.name,
-//       email: user.email,
-//       created_at: user.created_at,
-//       updated_at: user.updated_at
-//     };
-    
-//     // Store in localStorage
-//     localStorage.setItem('user_session', JSON.stringify(sessionData));
-//     localStorage.setItem('is_logged_in', 'true');
-    
-//     return {
-//       success: true,
-//       message: 'Login successful!',
-//       user: sessionData
-//     };
-    
-//   } catch (error) {
-//     console.error('Login error:', error);
-//     return {
-//       success: false,
-//       message: 'An unexpected error occurred. Please try again.'
-//     };
-//   }
-// };
+
 export const loginUser = async (loginData: LoginData): Promise<AuthResponse> => {
   try {
     const response = await fetch('http://127.0.0.1:8000/api/v1/login/', {

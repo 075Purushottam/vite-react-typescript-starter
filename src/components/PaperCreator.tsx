@@ -7,7 +7,6 @@ import { TopNavigation } from './paper-creator/TopNavigation';
 import { LeftSidebar } from './paper-creator/LeftSidebar';
 import { QuestionLibrary } from './paper-creator/QuestionLibrary';
 import { PaperPreview } from './paper-creator/PaperPreview';
-// import QuestionPaperGenerator from './paper-creator/QuestionPaperGenerator';
 import { ChatBot } from './paper-creator/ChatBot';
 import { isQuestion, isHeading } from '@/types/paper';
 import type { Question, PaperItem, Heading } from '@/types/paper';

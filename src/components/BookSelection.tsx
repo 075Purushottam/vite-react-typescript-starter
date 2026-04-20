@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { examService } from '../lib/supabase';
 import type { Book, Chapter } from '../lib/supabase';
-import { mockBoards, mockClasses, mockSubjects,mockBooks, mockChapters } from '../types/mockData';
 
 interface ExamDetails {
   schoolName: string;
@@ -108,22 +107,6 @@ const BookSelection = () => {
           })
         );
 
-        // const booksWithChapters = await Promise.all(
-        //   mockBooks.map(async (book) => {
-        //     const chapters = mockChapters.filter(c => c.book_id === book.id);
-        //     return {
-        //       id: book.id.toString(),
-        //       name: book.title,
-        //       expanded: false,
-        //       allSelected: false,
-        //       chapters: chapters.map(chapter => ({
-        //         id: chapter.id.toString(),
-        //         name: chapter.name,
-        //         selected: false
-        //       }))
-        //     };
-        //   })
-        // );
         setBooks(booksWithChapters);
       } catch (error) {
         console.error('Error loading books and chapters:', error);
