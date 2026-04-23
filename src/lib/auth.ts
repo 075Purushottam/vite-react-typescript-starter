@@ -27,7 +27,7 @@ export interface AuthResponse {
 }
 export const signupUser = async (signupData: SignupData): Promise<AuthResponse> => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/v1/signup/', {
+    const response = await fetch('https://questions-backend-production-d886.up.railway.app/api/v1/signup/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export const signupUser = async (signupData: SignupData): Promise<AuthResponse> 
 
 export const loginUser = async (loginData: LoginData): Promise<AuthResponse> => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/v1/login/', {
+    const response = await fetch('https://questions-backend-production-d886.up.railway.app/api/v1/login/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
