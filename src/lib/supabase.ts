@@ -40,7 +40,7 @@ export interface Chapter {
 }
 
 // Database service functions
-const BASE_API_URL = 'http://localhost:8000/api/v1' // Replace with your actual backend API URL
+const BASE_API_URL = 'https://questions-backend-production-d886.up.railway.app/api/v1' // Replace with your actual backend API URL
 export const examService = {
   // Fetch all classes
   async getClasses(): Promise<Class[]> {
