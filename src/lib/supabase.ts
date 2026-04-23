@@ -196,7 +196,7 @@ export const examService = {
     try {
       const token = localStorage.getItem("access_token");
 
-      const response = await fetch("https://questions-backend-production-d886.up.railway.app/api/v1/papers/create/", {
+      const response = await fetch(`${BASE_API_URL}/papers/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
