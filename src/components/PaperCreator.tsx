@@ -151,7 +151,7 @@ export const PaperCreator = () => {
       chapterIds.forEach((id: string) => params.append("chapter_ids", id));
 
       const res = await fetch(
-        `http://localhost:8000/api/v1/questions/by-chapters/?${params.toString()}`
+        `https://questions-backend-production-d886.up.railway.app/api/v1/questions/by-chapters/?${params.toString()}`
       );
 
       const data = await res.json();
