@@ -59,9 +59,13 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
   const navigate = useNavigate();
   const location = useLocation();
   const paperRef = useRef<HTMLDivElement>(null);
-
+  const navigationState = location.state;
+  const from = navigationState?.from;
+  console.log("Paper Preview Page From :", from);
+  
   // Get paperData from navigation state or props
   const paperData = location.state?.paperData || propPaperData;
+  console.log("Paper data in preview page:", paperData);
   const generatePDF = useCallback(async (includeAnswers: boolean) => {
     if (!paperRef.current) return;
     const canvas = await html2canvas(paperRef.current, {
@@ -132,12 +136,19 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
     // Sections
     paperData.sections.forEach((sectionData, sidx) => {
       const questionType = sectionData.questions[0]?.type;
+      console.log(`Section ${sidx + 1} question type:`, questionType ,typeof questionType,sectionData.questions.length,typeof sectionData.questions.length);
         const hasSingleMatchQuestion =
         sectionData.questions.length === 1 && questionType!== undefined &&
         [
           "Match the Following",
+          "Match the following",
           // add more types here if needed
         ].includes(questionType);
+        // const hasSingleMatchQuestion =
+        // sectionData.questions.length === 1 && questionType === "Match the Following";
+        if (hasSingleMatchQuestion) {
+          console.log(`Section ${sidx + 1} has a single question of type "${questionType}" with marks:`, sectionData.questions[0].marks);
+        }
       elements.push(
         <div key={`section-${sidx}`} className={styleMap.sectionHeader}>
           <span>{sidx + 1}. {sectionData.sectionTitle}</span>
@@ -148,10 +159,11 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
           )}
         </div>
       );
-
+      
       sectionData.questions.forEach((q, qidx) => {
-        if (q.type === 'Match the Following') {
+        if (q.type === 'Match the Following' || q.type === 'Match the following') {
           // Parse match question from stored text format
+          console.log("Parsing match question:", q.question);
           const pairs = q.question.split('\n').map(line => {
             const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
             if (match) {
@@ -217,7 +229,7 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
           <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
           <h2 className="text-xl font-semibold text-foreground">No Paper Data</h2>
           <p className="text-muted-foreground">No paper data found. Please go back and create a paper first.</p>
-          <Button onClick={() => navigate('/paper-creator')} variant="outline">
+          <Button onClick={() => navigate(from)} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Editor
           </Button>
@@ -236,7 +248,7 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
       {/* Sticky Toolbar */}
       <div className="sticky top-0 z-50 bg-card border-b border-border shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate('/paper-creator')} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" onClick={() => navigate(from)} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Editor
           </Button>
@@ -361,6 +373,7 @@ export default PaperPreviewPage;
         sectionData.questions.length === 1 && questionType!== undefined &&
         [
           "Match the Following",
+          "Match the following",
         ].includes(questionType);
         content.push({
       columns: [
@@ -396,7 +409,7 @@ export default PaperPreviewPage;
       
 
       sectionData.questions.forEach((q: any) => {
-        if (q.type === 'Match the Following') {
+        if (q.type === 'Match the Following' || q.type === 'Match the following') {
           // Parse match question from stored text format
           const pairs = q.question.split('\n').map((line: string) => {
             const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
@@ -483,6 +496,7 @@ export default PaperPreviewPage;
         sectionData.questions.length === 1 && questionType!== undefined &&
         [
           "Match the Following",
+          "Match the following",
         ].includes(questionType);
         content.push({
       columns: [
@@ -502,7 +516,21 @@ export default PaperPreviewPage;
     }); 
 
       sectionData.questions.forEach((q: any) => {
-        if (q.type === 'Match the Following') {
+       const getAnswerText = (answer?: {text:string} | string) =>{
+        if(!answer) return '';
+
+        if(typeof answer === 'string'){
+          try{
+            const parsed = JSON.parse(answer);
+            return parsed.text || answer;
+          } catch{
+            return answer;
+          }
+        }
+
+        return answer.text || '';
+      };
+        if (q.type === 'Match the Following' || q.type === 'Match the following') {
           // Parse match question from stored text format
           const pairs = q.question.split('\n').map((line: string) => {
             const match = line.match(/^\((\w)\)(.+?)\s*\((\d+)\)(.+)$/);
@@ -520,7 +548,7 @@ export default PaperPreviewPage;
           //   margin: [0, 5]
           // });
 
-          if (q.answer) {
+          if (getAnswerText(q.answer)) {
             // For match questions, show left items paired with correct answers
             const answerLines = (typeof q.answer === 'object' && q.answer.answer ? q.answer.answer : q.answer).split('\n');
             
@@ -557,7 +585,7 @@ export default PaperPreviewPage;
 
           if (q.answer) {
             content.push({
-              text: `Answer: ${q.answer}`,
+              text: `Answer: ${getAnswerText(q.answer)}`,
               style: "answerText"
             });
           }
