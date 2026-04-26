@@ -246,6 +246,16 @@ export const PaperCreator = () => {
     let questionsInCurrentHeading = 0;
     let targetQuestions: { item: PaperItem, index: number }[] = [];
 
+    const getAnswerText = (answer?: {text:string} | string) =>{
+      if(!answer) return '';
+
+      if(typeof answer === 'string'){
+        return answer;
+      }
+
+      return answer.text || '';
+    };
+
     for (let i = 0; i < paperItems.length; i++) {
       const item = paperItems[i];
       if (isHeading(item)) {
@@ -264,6 +274,7 @@ export const PaperCreator = () => {
       const [q1, q2] = targetQuestions;
       const mergedId = `merged-${Date.now()}`;
 
+
       const mergedQuestion: Question = {
         ...q1.item as Question,
         id: mergedId,
@@ -271,7 +282,8 @@ export const PaperCreator = () => {
         marks: (q1.item as Question).marks + (q2.item as Question).marks,
         isMerged: true,
         mergedWith: (q2.item as Question).id,
-        originalId: (q1.item as Question).id
+        originalId: (q1.item as Question).id,
+        answer: `${getAnswerText((q1.item as Question).answer)}\n\nOR\n\n${getAnswerText((q2.item as Question).answer)}`,
       };
 
       setPaperItems(prev => {
@@ -287,6 +299,15 @@ export const PaperCreator = () => {
     let currentHeading = 0;
     let questionsInCurrentHeading = 0;
     let targetIndex = -1;
+    const getAnswerText = (answer?: {text:string} | string) =>{
+        if(!answer) return '';
+
+        if(typeof answer === 'string'){
+          return answer;
+        }
+
+        return answer.text || '';
+      };
 
     for (let i = 0; i < paperItems.length; i++) {
       const item = paperItems[i];
@@ -306,6 +327,7 @@ export const PaperCreator = () => {
       const mergedQuestion = paperItems[targetIndex] as Question;
       if (mergedQuestion.isMerged) {
         const parts = mergedQuestion.question_text.split(/\n\nOR\n\n/);
+        const ans_parts = getAnswerText(mergedQuestion.answer).split(/\n\nOR\n\n/);
         if (parts.length === 2) {
           const originalMarks = Math.ceil(mergedQuestion.marks / 2);
 
@@ -317,7 +339,7 @@ export const PaperCreator = () => {
             marks: originalMarks,
             chapter: mergedQuestion.chapter,
             options: mergedQuestion.options,
-            answer: mergedQuestion.answer,
+            answer: ans_parts[0],
             book: 0,
             subject: 0
           };
@@ -330,7 +352,7 @@ export const PaperCreator = () => {
             marks: mergedQuestion.marks - originalMarks,
             chapter: mergedQuestion.chapter,
             options: mergedQuestion.options,
-            answer: mergedQuestion.answer,
+            answer: ans_parts[1],
             book: 0,
             subject: 0
           };

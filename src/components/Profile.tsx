@@ -33,6 +33,7 @@ interface Paper {
   createdTime: string;
   maxMarks: number;
   duration: number;
+  sections: any[]; // You can define a more specific type based on your data structure
 }
 
 const Profile = () => {
@@ -45,7 +46,7 @@ const Profile = () => {
   const [papers, setPapers] = useState<Paper []>([]);
   const [user, setUser] = useState(getCurrentUser());
   const from = navigationState?.from;
-  console.log("From :", from);
+  console.log("Profile From :", from);
   const handleBack = () => {
     if (from === 'paper-creator') {
       navigate('/paper-creator');
@@ -63,33 +64,72 @@ const Profile = () => {
     renewalDate: '2025-03-15'
   };
 
-  useEffect(() => {
-    const loadPapers = async () => {
-      try {
-        const data = await examService.fetchMyPapers();
-        console.log("Fetched papers from backend:", data);
-        // 🔥 Map backend fields to frontend format
-        const formattedPapers: Paper[] = (data as any).results.map((paper: any) => ({
-          id: paper.id,
-          title: paper.title,
-          examName: paper.exam_name,
-          class: paper.school_class,
-          subject: paper.subject,
-          board: paper.board,
-          createdDate: paper.created_at.split("T")[0],
-          createdTime: new Date(paper.created_at).toLocaleTimeString(),
-          maxMarks: paper.max_marks,
-          duration: paper.duration
-        }));
+  const mapBackendToPaperData = (paper: any) => {
+  return {
+    paperDetails: {
+      schoolName: paper.school_name || "",
+      examName: paper.examName || "",
+      class: paper.class || "",
+      subject: paper.subject || "",
+      date: paper.createdDate,
+      time: paper.createdTime,
+      maxMarks: paper.maxMarks,
+      instructions: []
+    },
 
-        setPapers(formattedPapers);
-      } catch (error) {
-        console.error("Error loading papers:", error);
-      }
-    };
+    sections: (paper.sections || []).map((section: any, sIndex: number) => ({
+      sectionTitle: section.name,
+      questions: (section.questions || []).map((q: any, qIndex: number) => ({
+        qno: q.order || qIndex + 1,
+        question: q.question_text,
+        marks: q.marks,
+        options: q.options || [],
+        answer: q.answer,
+        type: q.type,
+        matchPairs: q.matchPairs,
+        isMerged: q.isMerged
+      }))
+    }))
+  };
+};
 
-    loadPapers();
-  }, []);
+ useEffect(() => {
+  const loadPapers = async () => {
+    try {
+      const data = await examService.fetchMyPapers();
+
+      console.log("Fetched papers from backend:", data);
+      
+      const formattedPapers: Paper[] = data.map((paper: any) => ({
+        
+        id: paper.id,
+        title: paper.title,
+        examName: paper.exam_name,
+
+        // if you added names in serializer
+        class: paper.school_class || "",
+        subject: paper.subject || "",
+        board: paper.board || "",
+
+        createdDate: paper.created_at?.split("T")[0],
+        createdTime: new Date(paper.created_at).toLocaleTimeString(),
+
+        maxMarks: paper.max_marks,
+        duration: paper.duration,
+
+        // 🔥 IMPORTANT: pass full structure for preview
+        sections: paper.sections || []
+      }));
+
+      setPapers(formattedPapers);
+
+    } catch (error) {
+      console.error("Error loading papers:", error);
+    }
+  };
+
+  loadPapers();
+}, []);
 
 
   const filteredPapers = papers.filter(paper => {
@@ -295,7 +335,7 @@ const Profile = () => {
                   {/* Card Actions */}
                   <div className="px-6 pb-6">
                     <div className="flex gap-3">
-                      <button className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center group">
+                      <button className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center group" onClick={() => navigate(`/paper-preview/`, { state: { paperData: mapBackendToPaperData(paper), from: "/profile" } })}>
                         <Eye className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                         View
                       </button>

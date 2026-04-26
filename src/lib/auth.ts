@@ -108,6 +108,7 @@ export const logoutUser = (): void => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("paperCreatorState");
+  localStorage.clear();
 };
 
 // Validate email format
