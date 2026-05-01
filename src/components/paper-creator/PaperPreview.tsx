@@ -380,12 +380,6 @@ export const PaperPreview = ({ items, onRemoveItem, onUpdateItem, setPaperData, 
       'marks' in item ? sum + item.marks : sum, 0
     ),
     duration: examDetails.timeDuration, // You might want to add this to examDetails
-    // instructions: [
-    //   'All questions are compulsory.',
-    //   'Use of calculators is not permitted.',
-    //   'Show all working clearly.',
-    //   'Marks are indicated against each question.'
-    // ],
     instructions: examDetails.examInstructions ? examDetails.examInstructions.split('\n') : []
   };
 

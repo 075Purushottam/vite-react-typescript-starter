@@ -125,7 +125,7 @@ export const PaperCreator = () => {
         if (response.success) {
           alert("Paper saved successfully!");
           // localStorage.removeItem("paperCreatorState");
-          navigate('/paper-preview', { state: { paperData: paperData } }); // Pass paperData to preview page
+          navigate('/paper-preview', { state: { paperData: paperData, from: "/paper-creator" } }); // Pass paperData to preview page
         } else {
           alert(response.message || "Failed to save paper");
         }
@@ -168,7 +168,7 @@ export const PaperCreator = () => {
 
 
   const allQuestions = [...questions, ...customQuestions];
-  console.log("All Questions:", allQuestions);
+  // console.log("All Questions:", allQuestions);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -195,7 +195,7 @@ export const PaperCreator = () => {
       setPaperItems(arrayMove(paperItems, activeIndex, overIndex));
     }
     else if (foundQuestion && !paperItems.find(item => item.id === questionId)) {
-      console.log("Adding question to paper: ", foundQuestion);
+      // console.log("Adding question to paper: ", foundQuestion);
       if (overIndex !== -1) {
         setPaperItems(prev => {
           const next = [...prev];

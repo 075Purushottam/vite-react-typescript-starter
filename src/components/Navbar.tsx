@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FileText, Menu, X, User, LogOut } from 'lucide-react';
 import { getCurrentUser, isLoggedIn, logoutUser } from '../lib/auth';
 
@@ -119,7 +119,7 @@ const Navbar = () => {
             {userLoggedIn && user ? (
               <>
                 <button 
-                  onClick={() => navigate('/profile', { state: { from: 'home' } })}
+                  onClick={() => navigate('/profile', { state: { from: '/' } })}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 ${
                     isScrolled 
                       ? 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' 
