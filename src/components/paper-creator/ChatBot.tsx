@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import type { Question } from '@/types/paper';
+import { examService } from '@/lib/supabase';
 
 interface Message {
   id: string;
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  generatedQuestion?: Question;
+  generatedQuestions?: Question[];
 }
 
 interface ChatBotProps {
@@ -47,19 +48,42 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
     setIsLoading(true);
 
     // Simulate AI response
-    setTimeout(() => {
-      const response = generateBotResponse(inputValue);
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: response.text,
-        sender: 'bot',
-        timestamp: new Date(),
-        generatedQuestion: response.question
-      };
-      setMessages(prev => [...prev, botResponse]);
-      setIsLoading(false);
-    }, 1500);
+    // setTimeout(() => {
+    //   const response = generateBotResponse(inputValue);
+    //   const botResponse: Message = {
+    //     id: (Date.now() + 1).toString(),
+    //     text: response.text,
+    //     sender: 'bot',
+    //     timestamp: new Date(),
+    //     generatedQuestion: response.question
+    //   };
+    //   setMessages(prev => [...prev, botResponse]);
+    //   setIsLoading(false);
+    // }, 1500);
+
+    try {
+    const data = await examService.fetchGeneratedQuestions(inputValue);
+    console.log("Response from chatbot API:", data);
+    const botResponse: Message = {
+      id: (Date.now() + 1).toString(),
+      text: data.success
+        ? "Here are your generated questions."
+        : `Please provide: ${data.message?.join(", ")}`,
+      sender: 'bot',
+      timestamp: new Date(),
+      generatedQuestions: data.success ? data.questions : undefined
+    };
+
+    setMessages(prev => [...prev, botResponse]);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsLoading(false);
+  }
+  
   };
+  
+  
 
   const generateBotResponse = (userInput: string): { text: string; question?: Question } => {
     const input = userInput.toLowerCase();
@@ -194,30 +218,34 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
                   )}
                   <div className="flex-1">
                     <p className="text-sm leading-relaxed">{message.text}</p>
-                    {message.generatedQuestion && (
-                      <div className="mt-3 p-3 bg-card border border-border rounded-lg">
-                        <p className="text-xs text-muted-foreground mb-2">Generated Question:</p>
-                        <p className="text-sm font-medium mb-2">{message.generatedQuestion.question_text}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
-                              {message.generatedQuestion.type}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {message.generatedQuestion.difficulty}
-                            </Badge>
-                            <span>{message.generatedQuestion.marks} marks</span>
+                    {message.generatedQuestions && message.generatedQuestions.length > 0 && (
+                      <div className="mt-3 space-y-3">
+                        <p className="text-xs text-muted-foreground">Generated Questions:</p>
+                        {message.generatedQuestions.map((question, index) => (
+                          <div key={index} className="p-3 bg-card border border-border rounded-lg">
+                            <p className="text-sm font-medium mb-2">{question.question_text}</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <Badge variant="outline" className="text-xs">
+                                  {question.type}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {question.difficulty}
+                                </Badge>
+                                <span>{question.marks} marks</span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs"
+                                onClick={() => onGenerateQuestion?.(question)}
+                              >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Add to Paper
+                              </Button>
+                            </div>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs"
-                            onClick={() => onGenerateQuestion?.(message.generatedQuestion!)}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Add to Paper
-                          </Button>
-                        </div>
+                        ))}
                       </div>
                     )}
                     <p className="text-xs opacity-70 mt-1">

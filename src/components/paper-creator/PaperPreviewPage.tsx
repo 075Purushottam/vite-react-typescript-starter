@@ -302,7 +302,7 @@ export default PaperPreviewPage;
     { text: `${details.class} - ${details.subject}`, style: "subheader" },
     {
       columns: [
-        { text: `Time: ${details.time}`, alignment: "left" },
+        { text: `Time: ${details.time} min`, alignment: "left" },
         { text: `Date: ${details.date}`, alignment: "right" }
       ]
     },
@@ -517,6 +517,7 @@ export default PaperPreviewPage;
 
       sectionData.questions.forEach((q: any) => {
        const getAnswerText = (answer?: {text:string} | string) =>{
+        console.log("Getting answer text for:", answer);
         if(!answer) return '';
 
         if(typeof answer === 'string'){

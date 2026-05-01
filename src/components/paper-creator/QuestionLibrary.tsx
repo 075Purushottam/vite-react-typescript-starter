@@ -97,8 +97,8 @@ export const QuestionLibrary = ({ searchQuery, filters, questions, activeIds, sh
     const matchesSearch = searchQuery === '' ||
       question.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
       question.chapter.toLowerCase().includes(searchQuery.toLowerCase());
-    console.log("Question chapter:", question.chapter);
-    console.log("Filters chapter:", filters.chapter);
+    // console.log("Question chapter:", question.chapter);
+    // console.log("Filters chapter:", filters.chapter);
 
     const matchesChapter = filters.chapter === '' || question.chapter === filters.chapter;
     const matchesType = filters.type === '' || question.type === filters.type;
@@ -106,8 +106,8 @@ export const QuestionLibrary = ({ searchQuery, filters, questions, activeIds, sh
     console.log("Matches Difficulty:", matchesDifficulty);
     return matchesSearch && matchesChapter && matchesType && matchesDifficulty;
   });
- console.log("Filtered Questions:", filteredQuestions);
- console.log("Active IDs:", activeIds);
+//  console.log("Filtered Questions:", filteredQuestions);
+//  console.log("Active IDs:", activeIds);
  console.log("Available Questions:", filteredQuestions.filter(q => !activeIds.includes(q.id)));
   const availableQuestions = filteredQuestions.filter(q => !activeIds.includes(q.id));
 

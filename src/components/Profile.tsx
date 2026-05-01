@@ -67,14 +67,14 @@ const Profile = () => {
   const mapBackendToPaperData = (paper: any) => {
   return {
     paperDetails: {
-      schoolName: paper.school_name || "",
+      schoolName: paper.schoolName || "Unknown School",
       examName: paper.examName || "",
       class: paper.class || "",
       subject: paper.subject || "",
       date: paper.createdDate,
-      time: paper.createdTime,
+      time: paper.duration,
       maxMarks: paper.maxMarks,
-      instructions: []
+      instructions: paper.instructions || []          
     },
 
     sections: (paper.sections || []).map((section: any, sIndex: number) => ({
@@ -103,19 +103,22 @@ const Profile = () => {
       const formattedPapers: Paper[] = data.map((paper: any) => ({
         
         id: paper.id,
-        title: paper.title,
+        title: paper.school_name || "Untitled Paper",
         examName: paper.exam_name,
+        schoolName: paper.school_name || "Unknown School",
 
         // if you added names in serializer
         class: paper.school_class || "",
         subject: paper.subject || "",
         board: paper.board || "",
 
-        createdDate: paper.created_at?.split("T")[0],
+        // createdDate: paper.created_at?.split("T")[0],
+        createdDate: formatDate(paper.created_at?.split("T")[0]),
         createdTime: new Date(paper.created_at).toLocaleTimeString(),
 
         maxMarks: paper.max_marks,
         duration: paper.duration,
+        instructions: paper.exam_instructions ? paper.exam_instructions.split('\n').filter((line: string) => line.trim()) : ["No instructions available."],
 
         // 🔥 IMPORTANT: pass full structure for preview
         sections: paper.sections || []
@@ -147,11 +150,10 @@ const Profile = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
-    });
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   return (

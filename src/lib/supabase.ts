@@ -214,6 +214,35 @@ export const examService = {
         message: "Server error while saving paper"
       };
     }
+  },
+
+  async fetchGeneratedQuestions(userInput: any) {
+    try {
+      console.log("User query in service:", userInput);
+    const response = await fetch(`${BASE_API_URL}/chatbot/generate/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userInput })
+    });
+
+    if (!response.ok) {
+      // return json response with {"success": false, "message": "Error message from backend"}
+      const data = await response.json();
+      return {
+        "success": false,
+        "message": data.message || "Error generating questions"
+      }
+      // throw new Error(errorData.message || `Request failed with status ${response.status}`);
+      
+    }
+
+    const data = await response.json();
+    console.log("Response from chatbot API:", data);
+    return data;
+  } catch (error: any) {
+    console.error("Chatbot API error:", error);
+    return { flag: false, error: error.message };
   }
-  
+}
+
 }
