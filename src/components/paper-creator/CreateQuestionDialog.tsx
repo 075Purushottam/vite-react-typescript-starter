@@ -50,11 +50,20 @@ export const CreateQuestionDialog = ({ onCreateQuestion, }: CreateQuestionDialog
      'custom chapter'
   ];
 
-  const questionTypes: Question['type'][] = [
-    'MCQ', 'Short Answer', 'Long Answer', 'True False', 'Fill in the Blank', 'Match the Following'
-  ];
+  const questionTypes = [
+    { value: 'mcq', label: 'MCQ' },
+    { value: 'short', label: 'Short Answer' },
+    { value: 'long', label: 'Long Answer' },
+    { value: 'true_false', label: 'True False' },
+    { value: 'fill_Blank', label: 'Fill in the Blank' },
+    { value: 'match', label: 'Match the Following' }
+  ] as const;
 
-  const difficulties: Question['difficulty'][] = ['Easy', 'Medium', 'Hard'];
+  const difficulties = [
+    { value: 'easy', label: 'Easy' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'hard', label: 'Hard' }
+  ] as const;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,8 +174,8 @@ export const CreateQuestionDialog = ({ onCreateQuestion, }: CreateQuestionDialog
                 </SelectTrigger>
                 <SelectContent>
                   {questionTypes.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type}
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -184,8 +193,8 @@ export const CreateQuestionDialog = ({ onCreateQuestion, }: CreateQuestionDialog
                 </SelectTrigger>
                 <SelectContent>
                   {difficulties.map(difficulty => (
-                    <SelectItem key={difficulty} value={difficulty}>
-                      {difficulty}
+                    <SelectItem key={difficulty.value} value={difficulty.value}>
+                      {difficulty.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
