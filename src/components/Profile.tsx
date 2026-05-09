@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { examService } from '../lib/supabase';
 import { getCurrentUser } from '../lib/auth';
-
 import {
-  User,
   Mail,
   Crown,
   Calendar,
@@ -15,7 +13,6 @@ import {
   Filter,
   Upload,
   ArrowLeft,
-  BookOpen,
   School,
   Award,
   Clock,

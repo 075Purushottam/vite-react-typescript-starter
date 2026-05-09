@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
 import type { Question } from '@/types/paper';
-import { supabase } from '@/lib/supabase';
 
 
 interface CreateQuestionDialogProps {
@@ -42,8 +41,8 @@ export const CreateQuestionDialog = ({ onCreateQuestion, }: CreateQuestionDialog
     //   chapterId: string;
     //   chapterName: string;
     // }[]>([]);
-    const [chaptersLoading, setChaptersLoading] = useState(false);
-    const [chaptersError, setChaptersError] = useState<string | null>(null);
+    // const [chaptersLoading, setChaptersLoading] = useState(false);
+    // const [chaptersError, setChaptersError] = useState<string | null>(null);
   
    
   const chapters = [

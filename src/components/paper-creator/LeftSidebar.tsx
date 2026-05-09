@@ -9,8 +9,6 @@ import { useState, useEffect } from 'react';
 import { CreateQuestionDialog } from './CreateQuestionDialog';
 import { MergeDialog, SplitDialog } from './MergeSplitDialogs';
 import { MatchFollowingDialog } from './MatchFollowingDialog';
-// import { supabase } from '@/lib/supabase';
-// import { mockBoards, mockClasses, mockSubjects, mockBooks, mockChapters } from '@/types/mockData';
 
 interface LeftSidebarProps {
   filters: FilterType;

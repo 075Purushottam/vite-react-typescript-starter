@@ -10,9 +10,7 @@ import { PaperPreview } from './paper-creator/PaperPreview';
 import { ChatBot } from './paper-creator/ChatBot';
 import { isQuestion, isHeading } from '@/types/paper';
 import type { Question, PaperItem, Heading } from '@/types/paper';
-import { examService, supabase } from "@/lib/supabase";
-import { Book } from 'lucide-react';
-import PaperPreviewPage from './paper-creator/PaperPreviewPage';
+import { examService } from "@/lib/supabase";
 
 const STORAGE_KEY = "paperCreatorState";
 
@@ -68,7 +66,7 @@ export const PaperCreator = () => {
 
   const [questions, setQuestions] = useState<Question[]>(() => savedState?.questions || []);
   // const [postgres_questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   const [examDetailsState, setExamDetailsState] = useState(() => {
     const saved = localStorage.getItem('examDetails');

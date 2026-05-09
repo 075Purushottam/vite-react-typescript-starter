@@ -1,5 +1,5 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { GripVertical, BookOpen, Clock, Award, Bot, Library } from 'lucide-react';
+import { GripVertical, BookOpen, Award, Bot } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -88,7 +88,7 @@ const DraggableQuestion = ({ id, text, type, difficulty, marks, chapter }: Quest
   );
 };
 
-export const QuestionLibrary = ({ searchQuery, filters, questions, activeIds, showChatBot, onToggleChatBot, onCreateQuestion }: QuestionLibraryProps) => {
+export const QuestionLibrary = ({ searchQuery, filters, questions, activeIds, onToggleChatBot, onCreateQuestion }: QuestionLibraryProps) => {
   const { setNodeRef, isOver } = useDroppable({
     id: 'question-library',
   });
@@ -169,23 +169,6 @@ export const QuestionLibrary = ({ searchQuery, filters, questions, activeIds, sh
         </div>
       </ScrollArea>
 
-      {/* <ScrollArea className="flex-1">
-        <div className="p-6 space-y-4">
-          {availableQuestions.length > 0 ? (
-            availableQuestions.map((question) => (
-              <DraggableQuestion key={question.id} {...question} />
-            ))
-          ) : (
-            <div className="text-center py-12">
-              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No Questions Found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your filters or search terms to find questions.
-              </p>
-            </div>
-          )}
-        </div>
-      </ScrollArea> */}
     </div>
   );
 };

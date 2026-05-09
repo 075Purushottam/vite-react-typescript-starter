@@ -2,13 +2,9 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, FileText, FileDown, Printer } from 'lucide-react';
 import { useRef, useCallback } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
 
 interface MatchPair {
   left: string;
@@ -66,33 +62,33 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
   // Get paperData from navigation state or props
   const paperData = location.state?.paperData || propPaperData;
   console.log("Paper data in preview page:", paperData);
-  const generatePDF = useCallback(async (includeAnswers: boolean) => {
-    if (!paperRef.current) return;
-    const canvas = await html2canvas(paperRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-    });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    let heightLeft = pdfHeight;
-    let position = 0;
+  // const generatePDF = useCallback(async (includeAnswers: boolean) => {
+  //   if (!paperRef.current) return;
+  //   const canvas = await html2canvas(paperRef.current, {
+  //     scale: 2,
+  //     useCORS: true,
+  //     backgroundColor: '#ffffff',
+  //   });
+  //   const imgData = canvas.toDataURL('image/png');
+  //   const pdf = new jsPDF('p', 'mm', 'a4');
+  //   const pdfWidth = pdf.internal.pageSize.getWidth();
+  //   const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  //   let heightLeft = pdfHeight;
+  //   let position = 0;
 
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-    heightLeft -= pdf.internal.pageSize.getHeight();
+  //   pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+  //   heightLeft -= pdf.internal.pageSize.getHeight();
 
-    while (heightLeft > 0) {
-      position -= pdf.internal.pageSize.getHeight();
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
-    }
+  //   while (heightLeft > 0) {
+  //     position -= pdf.internal.pageSize.getHeight();
+  //     pdf.addPage();
+  //     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+  //     heightLeft -= pdf.internal.pageSize.getHeight();
+  //   }
 
-    const fileName = includeAnswers ? 'answer-sheet.pdf' : 'question-paper.pdf';
-    pdf.save(fileName);
-  }, []);
+  //   const fileName = includeAnswers ? 'answer-sheet.pdf' : 'question-paper.pdf';
+  //   pdf.save(fileName);
+  // }, []);
 
   const handlePrint = useCallback(() => {
     window.print();
@@ -238,10 +234,10 @@ const PaperPreviewPage = ({ paperData: propPaperData }: PaperPreviewPageProps) =
     );
   }
 
-  const { paperDetails, sections } = paperData;
-  const totalMarks = paperDetails.maxMarks ?? sections.reduce(
-    (sum: number, s: any) => sum + s.questions.reduce((qs: number, q: any) => qs + q.marks, 0), 0
-  );
+  // const { paperDetails, sections } = paperData;
+  // const totalMarks = paperDetails.maxMarks ?? sections.reduce(
+  //   (sum: number, s: any) => sum + s.questions.reduce((qs: number, q: any) => qs + q.marks, 0), 0
+  // );
 
   return (
     <div className="flex flex-col h-screen bg-muted/30 print:bg-white">

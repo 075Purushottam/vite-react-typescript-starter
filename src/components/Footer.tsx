@@ -1,4 +1,3 @@
-import React from 'react';
 import { FileText, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
@@ -49,15 +48,15 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center">
                 <Mail className="w-5 h-5 text-blue-400 mr-3" />
-                <span className="text-gray-400">support@questionpapertool.com</span>
+                <span className="text-gray-400">pintupatidar444@gmail.com</span>
               </div>
               <div className="flex items-center">
                 <Phone className="w-5 h-5 text-green-400 mr-3" />
-                <span className="text-gray-400">+91 9876543210</span>
+                <span className="text-gray-400">+91 8823083040</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="w-5 h-5 text-red-400 mr-3" />
-                <span className="text-gray-400">Mumbai, India</span>
+                <span className="text-gray-400">Indore, India</span>
               </div>
             </div>
           </div>
