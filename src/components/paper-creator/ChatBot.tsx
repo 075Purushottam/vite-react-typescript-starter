@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Send, Bot, User, Loader2, Plus, Library } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -85,75 +84,75 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
   
   
 
-  const generateBotResponse = (userInput: string): { text: string; question?: Question } => {
-    const input = userInput.toLowerCase();
+  // const generateBotResponse = (userInput: string): { text: string; question?: Question } => {
+  //   const input = userInput.toLowerCase();
     
-    if (input.includes('algebra') || input.includes('equation')) {
-      const question: Question = {
-        id: `ai-q-${Date.now()}`,
-        question_text: 'Solve for x: 3x + 7 = 22',
-        type: 'Short Answer',
-        difficulty: 'Medium',
-        marks: 3,
-        chapter: 1,
-        book:1,
-        subject:1
-      };
-      return {
-        text: 'I\'ve generated an algebra question for you. You can add it to your paper using the button below.',
-        question
-      };
-    } else if (input.includes('geometry') || input.includes('triangle')) {
-      const question: Question = {
-        id: `ai-q-${Date.now()}`,
-        question_text: 'In a right-angled triangle, if one angle is 30°, find the other two angles.',
-        type: 'Short Answer',
-        difficulty: 'Easy',
-        marks: 2,
-        chapter: 2,
-        book:1,
-        subject:1
-      };
-      return {
-        text: 'Here\'s a geometry question about triangles. Click the button below to add it to your paper.',
-        question
-      };
-    } else if (input.includes('easy') || input.includes('simple')) {
-      const question: Question = {
-        id: `ai-q-${Date.now()}`,
-        question_text: 'What is 15% of 200?',
-        type: 'Short Answer',
-        difficulty: 'Easy',
-        marks: 2,
-        chapter: 3,
-        book:1,
-        subject:1 
-      };
-      return {
-        text: 'I\'ve created an easy percentage question for you.',
-        question
-      };
-    } else if (input.includes('hard') || input.includes('difficult')) {
-      const question: Question = {
-        id: `ai-q-${Date.now()}`,
-        question_text: 'Prove that the sum of squares of the sides of a parallelogram equals the sum of squares of its diagonals.',
-        type: 'Long Answer',
-        difficulty: 'Hard',
-        marks: 5,
-        chapter: 2,
-        book:1,
-        subject:1 
-      };
-      return {
-        text: 'Here\'s a challenging geometry proof question.',
-        question
-      };
-    } else {
-      return {
-        text: 'I can help you create questions! Try asking me to generate questions for specific topics like "Create an algebra question" or "Generate a hard geometry problem".'
-      };
-    }
-  };
+  //   if (input.includes('algebra') || input.includes('equation')) {
+  //     const question: Question = {
+  //       id: `ai-q-${Date.now()}`,
+  //       question_text: 'Solve for x: 3x + 7 = 22',
+  //       type: 'Short Answer',
+  //       difficulty: 'Medium',
+  //       marks: 3,
+  //       chapter: 1,
+  //       book:1,
+  //       subject:1
+  //     };
+  //     return {
+  //       text: 'I\'ve generated an algebra question for you. You can add it to your paper using the button below.',
+  //       question
+  //     };
+  //   } else if (input.includes('geometry') || input.includes('triangle')) {
+  //     const question: Question = {
+  //       id: `ai-q-${Date.now()}`,
+  //       question_text: 'In a right-angled triangle, if one angle is 30°, find the other two angles.',
+  //       type: 'Short Answer',
+  //       difficulty: 'Easy',
+  //       marks: 2,
+  //       chapter: 2,
+  //       book:1,
+  //       subject:1
+  //     };
+  //     return {
+  //       text: 'Here\'s a geometry question about triangles. Click the button below to add it to your paper.',
+  //       question
+  //     };
+  //   } else if (input.includes('easy') || input.includes('simple')) {
+  //     const question: Question = {
+  //       id: `ai-q-${Date.now()}`,
+  //       question_text: 'What is 15% of 200?',
+  //       type: 'Short Answer',
+  //       difficulty: 'Easy',
+  //       marks: 2,
+  //       chapter: 3,
+  //       book:1,
+  //       subject:1 
+  //     };
+  //     return {
+  //       text: 'I\'ve created an easy percentage question for you.',
+  //       question
+  //     };
+  //   } else if (input.includes('hard') || input.includes('difficult')) {
+  //     const question: Question = {
+  //       id: `ai-q-${Date.now()}`,
+  //       question_text: 'Prove that the sum of squares of the sides of a parallelogram equals the sum of squares of its diagonals.',
+  //       type: 'Long Answer',
+  //       difficulty: 'Hard',
+  //       marks: 5,
+  //       chapter: 2,
+  //       book:1,
+  //       subject:1 
+  //     };
+  //     return {
+  //       text: 'Here\'s a challenging geometry proof question.',
+  //       question
+  //     };
+  //   } else {
+  //     return {
+  //       text: 'I can help you create questions! Try asking me to generate questions for specific topics like "Create an algebra question" or "Generate a hard geometry problem".'
+  //     };
+  //   }
+  // };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

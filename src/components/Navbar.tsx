@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Menu, X, User, LogOut } from 'lucide-react';
 import { getCurrentUser, isLoggedIn, logoutUser } from '../lib/auth';
 
@@ -169,7 +169,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden relative z-50">
             <button
               onClick={toggleMenu}
               className={`p-2 rounded-lg transition-all duration-300 ${
@@ -191,7 +191,7 @@ const Navbar = () => {
         <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
           isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-md rounded-b-2xl shadow-lg border-t border-gray-100 mt-2">
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-md rounded-b-2xl shadow-lg border-t border-gray-100 mt-2 relative z-40">
             {menuItems.map((item) => (
               <a
                 key={item.name}

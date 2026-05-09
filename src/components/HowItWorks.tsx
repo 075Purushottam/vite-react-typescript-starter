@@ -1,7 +1,9 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LogIn, FileText, BookOpen, MousePointer, Download } from 'lucide-react';
+import { isLoggedIn } from '@/lib/auth';
 
 const HowItWorks = () => {
+  const navigate = useNavigate();
   const steps = [
     {
       icon: LogIn,
@@ -99,7 +101,15 @@ const HowItWorks = () => {
 
         {/* Call to Action */}
         <div className="text-center mt-16">
-          <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+          <button 
+            onClick={() =>{
+                      if (isLoggedIn()){
+                        navigate('/exam-form')
+                      } else {
+                        navigate('/login')
+                      }
+                    } }
+            className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">  
             Start Creating Now
             <MousePointer className="inline w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
           </button>

@@ -1,5 +1,3 @@
-import { supabase } from './supabase';
-import bcrypt from 'bcryptjs';
 
 export interface User {
   id: string;
