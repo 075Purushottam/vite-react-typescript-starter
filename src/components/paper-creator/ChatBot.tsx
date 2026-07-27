@@ -18,9 +18,10 @@ interface Message {
 interface ChatBotProps {
   onGenerateQuestion?: (question: Question) => void;
   onToggleChatBot?: () => void;
+  examDetails?: Record<string, any>;
 }
 
-export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) => {
+export const ChatBot = ({ onGenerateQuestion, onToggleChatBot, examDetails }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -61,7 +62,7 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
     // }, 1500);
 
     try {
-    const data = await examService.fetchGeneratedQuestions(inputValue);
+    const data = await examService.fetchGeneratedQuestions(inputValue, examDetails);
     console.log("Response from chatbot API:", data);
     const botResponse: Message = {
       id: (Date.now() + 1).toString(),
@@ -202,7 +203,7 @@ export const ChatBot = ({ onGenerateQuestion, onToggleChatBot }: ChatBotProps) =
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
+                className={`max-w-auto rounded-lg p-3 ${
                   message.sender === 'user'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-foreground'

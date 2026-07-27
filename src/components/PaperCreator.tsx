@@ -11,6 +11,7 @@ import { ChatBot } from './paper-creator/ChatBot';
 import { isQuestion, isHeading } from '@/types/paper';
 import type { Question, PaperItem, Heading } from '@/types/paper';
 import { examService } from "@/lib/supabase";
+import { getCurrentUserSubscription } from '../lib/auth';
 
 const STORAGE_KEY = "paperCreatorState";
 
@@ -112,6 +113,21 @@ export const PaperCreator = () => {
       console.error("No paper data to save");
       return;
     } else {
+      // Check subscription/credits before allowing save
+      const subscription = getCurrentUserSubscription();
+
+      if (!subscription || !subscription.is_active) {
+        const goToPricing = window.confirm("You need an active subscription to save papers. Go to Pricing to upgrade?");
+        if (goToPricing) navigate('/pricing');
+        return;
+      }
+
+      if (subscription.remaining_papers !== null && typeof subscription.remaining_papers === 'number' && subscription.remaining_papers <= 0) {
+        const goToPricing = window.confirm("You've exhausted your paper credits for this period. Go to Pricing to upgrade or renew?");
+        if (goToPricing) navigate('/pricing');
+        return;
+      }
+
       const isConfirmed = window.confirm("Are you sure you want to save this paper?");
 
       if (!isConfirmed) return;
@@ -121,6 +137,26 @@ export const PaperCreator = () => {
         const response = await examService.savePaper(paperData);
 
         if (response.success) {
+          // Update local subscription copy if backend returned updated subscription
+          if (response.subscription) {
+            try {
+              localStorage.setItem('user_subscription', JSON.stringify(response.subscription));
+            } catch (e) {
+              console.warn('Failed to update local subscription copy:', e);
+            }
+          } else {
+            // optimistic decrement if backend didn't return updated subscription
+            try {
+              const sub = getCurrentUserSubscription();
+              if (sub && typeof sub.remaining_papers === 'number') {
+                sub.remaining_papers = Math.max(0, sub.remaining_papers - 1);
+                localStorage.setItem('user_subscription', JSON.stringify(sub));
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
+
           alert("Paper saved successfully!");
           // localStorage.removeItem("paperCreatorState");
           navigate('/paper-preview', { state: { paperData: paperData, from: "/paper-creator" } }); // Pass paperData to preview page
@@ -396,7 +432,11 @@ export const PaperCreator = () => {
           />
 
           {showChatBot ? (
-            <ChatBot onGenerateQuestion={handleCreateQuestion} onToggleChatBot={handleToggleChatBot} />
+            <ChatBot
+              onGenerateQuestion={handleCreateQuestion}
+              onToggleChatBot={handleToggleChatBot}
+              examDetails={examDetails || examDetailsState}
+            />
           ) : (
             <QuestionLibrary
               searchQuery={searchQuery}

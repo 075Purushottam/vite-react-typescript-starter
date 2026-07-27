@@ -212,11 +212,16 @@ const SortableItem = ({ item, index: _index, questionNumber, sectionNumber, onRe
                   {item.question_text}
                   {item.options && (
                     <div className="grid grid-cols-2 gap-x-6-gap-y-1 mt-2">
-                      {Object.entries(item.options).map(([key, value]) => (
-                        <div key={key}>
-                          <strong>{key}:</strong> {value}
-                        </div>
-                      ))}
+                      {Object.entries(item.options).map(([key, value]) => {
+                        const label = /^[0-9]+$/.test(key)
+                          ? String.fromCharCode(65 + Number(key))
+                          : key;
+                        return (
+                          <div key={key}>
+                            <strong>{label}:</strong> {value}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </p>

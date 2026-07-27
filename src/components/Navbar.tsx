@@ -89,10 +89,15 @@ const Navbar = () => {
               <span className={`text-xl font-bold transition-colors duration-300 ${
                 isScrolled ? 'text-gray-900' : 'text-white'
               }`}>
-                Question Paper Tool
+                {/* Question Paper Tool */}
+                {<img src="/paperbuilder_cool_blue.PNG" alt="Logo" className="h-10 w-auto" />}
               </span>
             </div>
           </div>
+        {/* Logo with png Image */}
+          {/* <div className="flex-shrink-0">
+            <img src="/paperbuilder.png" alt="Logo" className="h-10 w-auto" />
+          </div> */}
 
           {/* Desktop Menu */}
           <div className="hidden md:block">

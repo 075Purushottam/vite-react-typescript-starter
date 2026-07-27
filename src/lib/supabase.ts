@@ -216,13 +216,13 @@ export const examService = {
     }
   },
 
-  async fetchGeneratedQuestions(userInput: any) {
+  async fetchGeneratedQuestions(userInput: any, examDetails?: any) {
     try {
-      console.log("User query in service:", userInput);
+      console.log("User query in service:", userInput, "examDetails:", examDetails);
     const response = await fetch(`${BASE_API_URL}/chatbot/generate/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userInput })
+      body: JSON.stringify({ message: userInput, examDetails })
     });
 
     if (!response.ok) {
