@@ -63,7 +63,12 @@ export const loginUser = async (loginData: LoginData): Promise<AuthResponse> => 
       localStorage.setItem('is_logged_in', 'true');
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
-      localStorage.removeItem("paperCreatorState");
+      // persist subscription object if backend returns it
+      if (data.subscription) {
+        localStorage.setItem('user_subscription', JSON.stringify(data.subscription));
+      } else {
+        localStorage.removeItem('user_subscription');
+      }
     }
 
     return data;
@@ -106,7 +111,20 @@ export const logoutUser = (): void => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("paperCreatorState");
-  localStorage.clear();
+  localStorage.removeItem('user_subscription');
+  // keep clear commented out to avoid removing other app-wide keys unexpectedly
+  // localStorage.clear();
+};
+
+// Get current user subscription (if any)
+export const getCurrentUserSubscription = (): any | null => {
+  try {
+    const sub = localStorage.getItem('user_subscription');
+    return sub ? JSON.parse(sub) : null;
+  } catch (error) {
+    console.error('Error getting current subscription:', error);
+    return null;
+  }
 };
 
 // Validate email format

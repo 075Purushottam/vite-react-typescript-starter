@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { examService } from '../lib/supabase';
-import { getCurrentUser } from '../lib/auth';
+import { getCurrentUser, getCurrentUserSubscription } from '../lib/auth';
 import {
   Mail,
   Crown,
@@ -51,15 +51,28 @@ const Profile = () => {
       navigate('/');
     }
   };
-  // Mock user data
+  // Subscription info from local storage (populated on login)
+  const [subscription, setSubscription] = useState(getCurrentUserSubscription());
+
+  // Compose user data (fallbacks when subscription is unavailable)
   const userData = {
     name: user?.name || 'Guest User',
     email: user?.email || 'guest@example.com',
     avatar: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-    plan: 'Pro Plan',
-    planColor: 'from-blue-600 to-purple-600',
-    renewalDate: '2025-03-15'
+    plan: subscription?.plan?.name || 'Free Plan',
+    planColor: subscription?.plan ? 'from-blue-600 to-purple-600' : 'from-gray-400 to-gray-500',
+    renewalDate: subscription?.end_date || 'N/A',
+    remainingPapers: subscription?.remaining_papers ?? 'Unlimited'
   };
+
+  useEffect(() => {
+    const handleStorage = () => {
+      setSubscription(getCurrentUserSubscription());
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const mapBackendToPaperData = (paper: any) => {
   return {
@@ -218,7 +231,8 @@ const Profile = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">{userData.plan}</h3>
-                      <p className="text-sm text-gray-600">Renews on {formatDate(userData.renewalDate)}</p>
+                      <p className="text-sm text-gray-600">{userData.renewalDate !== 'N/A' ? `Renews on ${formatDate(userData.renewalDate)}` : 'No active subscription'}</p>
+                      <p className="text-sm text-gray-600">Remaining papers: <span className="font-medium text-gray-900">{userData.remainingPapers}</span></p>
                     </div>
                   </div>
                   <div className="flex gap-3">
